@@ -27,6 +27,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.2)
+    verbose_hash_fetch (0.0.2)
 
 PLATFORMS
   ruby
@@ -36,6 +37,7 @@ DEPENDENCIES
   awesome_print
   http
   sinatra
+  verbose_hash_fetch
 
 BUNDLED WITH
    1.13.6
