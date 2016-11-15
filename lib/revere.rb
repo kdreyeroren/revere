@@ -90,37 +90,6 @@ module Revere
 
   end
 
-  # creates a zendesk ticket
-  def self.create_zendesk_ticket
-    zendesk_request(:post, "tickets.json", {
-      ticket: {
-        subject: "Test ticket 3!",
-        comment: {
-          body: "There is not enough chocolate in the world."
-        }
-      }
-    })
-  end
-
-  # modifies a zendesk ticket
-  def self.modify_zendesk_ticket(ticket_id)
-    response = zendesk_request(:put, "tickets/#{ticket_id}.json", {
-      ticket: {
-        custom_fields: [{
-          id: "46456408",
-          value: "done"
-        }]
-      }
-    })
-
-    if response.code == 200
-      response
-    else
-      raise "HTTP code is #{response.code}, response is #{response.to_s}"
-    end
-
-  end
-
   def self.modify_zendesk_ticket_with_trello_list(ticket_id, trello_list_name)
     response = zendesk_request(:put, "tickets/#{ticket_id}.json", {
       ticket: {
