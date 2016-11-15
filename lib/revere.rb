@@ -48,7 +48,19 @@ module Revere
 
   # triggers the webhook
   def self.create_trello_webhook(callback_url)
-    trello_request(:post, "webhooks", callbackURL: callback_url, idModel: ID_MODEL)
+    response = trello_request(:post, "webhooks", callbackURL: callback_url, idModel: ID_MODEL)
+    response.to_s
+  end
+
+  def self.get_webhooks
+    response = trello_request(:get, "webhooks/#{ID_MODEL}/")
+
+    if response.code == 200
+      response
+    else
+      raise "HTTP code is #{response.code}, response is #{response.to_s}"
+    end
+
   end
 
 

@@ -7,7 +7,7 @@ end
 
 post '/create_trello_webhook' do
   Revere.create_trello_webhook("#{request.base_url}/trello")
-  redirect to('/')
+  # redirect to('/')
 end
 
 head '/trello' do
@@ -15,7 +15,15 @@ head '/trello' do
 end
 
 post '/trello' do
-  Revere.puts_trello_list_name_on_zendesk_ticket("5829e45e3772201e9ea87d4e")
+  request.body.rewind
+  request_payload = JSON.parse request.body.read
+  card_id = request_payload.dig("action", "data", "card", "id")
+  Revere.puts_trello_list_name_on_zendesk_ticket(card_id)
+  200
+end
+
+get '/get_webhooks' do
+  Revere.get_webhooks.to_s
 end
 
 
