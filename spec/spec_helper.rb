@@ -4,9 +4,10 @@ require "bundler/setup"
 Bundler.setup
 
 require "webmock/rspec"
-require "revere"
 require "rack/test"
-require "./web"
+require_relative "../environment"
+require "revere"
+require "revere/web"
 
 WebMock.disable_net_connect!
 WebMock.enable!
