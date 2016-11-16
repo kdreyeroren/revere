@@ -1,15 +1,22 @@
 module Revere
   module Zendesk
+
+
+    def self.get_zendesk_config
+      rack_env = ENV.fetch("RACK_ENV", "development")
+      YAML.load_file("config/zendesk.yml").fetch(rack_env)
+    end
+
     ZENDESK_USER = "dev@teachable.com/token"
     ZENDESK_TOKEN = "W2JFWU3YnFMrrDzAZVfseRtOE8vxYzxCtt2hD2Bi"
     ZENDESK_BASE_URI = "https://teachable1475385865.zendesk.com/api/v2/"
-    TRELLO_LIST_NAME_ID = "46456408"
+    # TRELLO_LIST_NAME_ID = "46456408"
 
     def self.modify_ticket_with_trello_list(ticket_id, trello_list_name)
       response = request(:put, "tickets/#{ticket_id}.json", {
         ticket: {
           custom_fields: [{
-            id: TRELLO_LIST_NAME_ID,
+            id: get_zendesk_config.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
             value: trello_list_name
           }]
         }

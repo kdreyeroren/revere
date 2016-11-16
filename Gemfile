@@ -4,7 +4,7 @@ gem "sinatra"
 gem "http"
 gem "addressable"
 gem "verbose_hash_fetch"
-
+gem "pry"
 
 group :development do
   gem "awesome_print"
