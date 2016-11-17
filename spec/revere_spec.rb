@@ -36,8 +36,8 @@ RSpec.describe Revere do
     post "/trello", {action: {data: {card: {id: "some id"}}}}.to_json
 
     expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
-    .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
-    .to have_been_made
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .to have_been_made
   end
 
   it "handles multiple zendesk attachments" do
@@ -56,7 +56,7 @@ RSpec.describe Revere do
     .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
     .to have_been_made
     expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/666.json")
-    .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
   end
 
   it "handles other types of attachments" do
@@ -68,6 +68,23 @@ RSpec.describe Revere do
     post "/trello", {action: {data: {card: {id: "some id"}}}}.to_json
 
     expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")).to_not have_been_made
+  end
+
+  it "syncs all the cards" do
+    stub_request(:get, %r"https://trello.com/1/boards/5817c317669034928804c17d/cards")
+      .to_return(status: 200, body: [{id: 1234}].to_json, headers: {})
+    stub_request(:get, %r"https://trello.com/1/cards/1234/attachments\?")
+      .to_return(status: 200, body: [{url: "zendesk.com/ticket/1337"}].to_json)
+    stub_request(:get, %r"https://trello.com/1/cards/1234/list\?")
+      .to_return(status: 200, body: {name: "list name"}.to_json)
+    stub_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
+      .to_return(status: 200)
+
+    Revere.sync_tickets
+
+    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .to have_been_made
   end
 
 end
