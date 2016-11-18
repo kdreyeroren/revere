@@ -6,11 +6,7 @@ require 'revere/trello'
 require 'revere/zendesk'
 require 'yaml'
 
-
 module Revere
-
-  rack_env = ENV.fetch("RACK_ENV", "development")
-  ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(rack_env)
 
   def self.puts_trello_list_name_on_zendesk_ticket(card_id)
     # step 1. Find zendesk ticket ids

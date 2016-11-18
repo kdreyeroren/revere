@@ -1,6 +1,8 @@
 module Revere
   module Zendesk
 
+    ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(RACK_ENV)
+
     BASE_URI = ENV.fetch("ZENDESK_BASE_URI")
     USER = ENV.fetch("ZENDESK_USER")
     TOKEN = ENV.fetch("ZENDESK_TOKEN")
@@ -14,7 +16,6 @@ module Revere
           }]
         }
       })
-
     end
 
     # template for zendesk requests
