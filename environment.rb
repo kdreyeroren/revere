@@ -5,5 +5,5 @@ Bundler.setup
 
 if ENV["RACK_ENV"] != "production"
   require "dotenv"
-  Dotenv.load
+  Dotenv.load(".env.#{ENV["RACK_ENV"]}", ".env")
 end

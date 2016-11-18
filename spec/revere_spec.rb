@@ -6,6 +6,30 @@ RSpec.describe Revere do
     Sinatra::Application
   end
 
+  TRELLO_BASE_URI = Revere::Trello::BASE_URI
+  ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
+  TRELLO_BOARD_ID = Revere::Trello::BOARD_ID
+
+  def stub_trello_attachment(card_id, body)
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/#{card_id}/attachments\?")
+      .to_return(status: 200, body: body.to_json)
+  end
+
+  def stub_trello_list(card_id, body)
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/#{card_id}/list\?")
+      .to_return(status: 200, body: body.to_json)
+  end
+
+  def stub_zendesk_ticket(ticket_id)
+    stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(status: 200)
+  end
+
+  def stub_trello_board(body)
+    stub_request(:get, %r"#{TRELLO_BASE_URI}boards/#{TRELLO_BOARD_ID}/cards")
+      .to_return(status: 200, body: body.to_json, headers: {})
+  end
+
   it "creates a trello webhook" do
     allow(Revere::Trello).to receive(:create_webhook).and_return("hello")
 
@@ -17,7 +41,7 @@ RSpec.describe Revere do
   end
 
   it "creates a trello webhook with a stub" do
-    stub_request(:post, %r{https://trello.com/1/webhooks\?callbackURL=http://example.org/trello})
+    stub_request(:post, %r{#{TRELLO_BASE_URI}webhooks\?callbackURL=http://example.org/trello})
       .to_return(status: 200, body: "{}", headers: {})
 
     post "/create_trello_webhook"
@@ -26,63 +50,50 @@ RSpec.describe Revere do
   end
 
   it "does everything" do
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/attachments\?")
-      .to_return(status: 200, body: [{url: "zendesk.com/ticket/1337"}].to_json)
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/list\?")
-      .to_return(status: 200, body: {name: "list name"}.to_json)
-    stub_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
-      .to_return(status: 200)
+    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}])
+    stub_trello_list("trello_card_id", {name: "list name"})
+    stub_zendesk_ticket("1337")
 
-    post "/trello", {action: {data: {card: {id: "some id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
-    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
+    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
       .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
       .to have_been_made
   end
 
   it "handles multiple zendesk attachments" do
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/attachments\?")
-      .to_return(status: 200, body: [{url: "zendesk.com/ticket/1337"}, {url: "zendesk.com/ticket/666"}].to_json)
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/list\?")
-      .to_return(status: 200, body: {name: "list name"}.to_json)
-    stub_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
-      .to_return(status: 200)
-    stub_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/666.json")
-      .to_return(status: 200)
+    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "zendesk.com/ticket/666"}])
+    stub_trello_list("trello_card_id", {name: "list name"})
+    stub_zendesk_ticket("1337")
+    stub_zendesk_ticket("666")
 
-    post "/trello", {action: {data: {card: {id: "some id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
-    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
+    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
     .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
     .to have_been_made
-    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/666.json")
+    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/666.json")
       .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
   end
 
   it "handles other types of attachments" do
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/attachments\?")
-      .to_return(status: 200, body: [{url: "boston.com/imwithstupid"}].to_json)
-    stub_request(:get, %r"https://trello.com/1/cards/some%20id/list\?")
-      .to_return(status: 200, body: {name: "list name"}.to_json)
+    stub_trello_attachment("trello_card_id", [{url: "boston.com/imwithstupid"}])
+    stub_trello_list("trello_card_id", {name: "list name"})
 
-    post "/trello", {action: {data: {card: {id: "some id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
-    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")).to_not have_been_made
+    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")).to_not have_been_made
   end
 
   it "syncs all the cards" do
-    stub_request(:get, %r"https://trello.com/1/boards/5817c317669034928804c17d/cards")
-      .to_return(status: 200, body: [{id: 1234}].to_json, headers: {})
-    stub_request(:get, %r"https://trello.com/1/cards/1234/attachments\?")
-      .to_return(status: 200, body: [{url: "zendesk.com/ticket/1337"}].to_json)
-    stub_request(:get, %r"https://trello.com/1/cards/1234/list\?")
-      .to_return(status: 200, body: {name: "list name"}.to_json)
-    stub_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
-      .to_return(status: 200)
+    stub_trello_board([{id: 1234}])
+    stub_trello_attachment("1234", [{url: "zendesk.com/ticket/1337"}])
+    stub_trello_list("1234", {name: "list name"})
+    stub_zendesk_ticket("1337")
 
     Revere.sync_tickets
 
-    expect(a_request(:put, %r"https://teachable1475385865.zendesk.com/api/v2/tickets/1337.json")
+    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
       .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
       .to have_been_made
   end
