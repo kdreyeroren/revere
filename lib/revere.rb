@@ -1,10 +1,11 @@
+require 'yaml'
+
 require 'http'
-require 'awesome_print'
 require 'addressable/uri'
 require 'verbose_hash_fetch'
+
 require 'revere/trello'
 require 'revere/zendesk'
-require 'yaml'
 
 module Revere
 
