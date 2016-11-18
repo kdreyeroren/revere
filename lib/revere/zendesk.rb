@@ -28,7 +28,7 @@ module Revere
       if response.code == 200
         response
       else
-        raise "HTTP code is #{response.code}, response is #{response.to_s}"
+        raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}, data:#{data.inspect}"
       end
     end
 

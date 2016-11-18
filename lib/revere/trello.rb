@@ -47,7 +47,7 @@ module Revere
       if response.code == 200
         JSON.parse(response.to_s)
       else
-        raise "HTTP code is #{response.code}, response is #{response.to_s}"
+        raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}, data:#{data.inspect}"
       end
 
     end
