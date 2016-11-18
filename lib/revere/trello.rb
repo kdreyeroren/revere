@@ -42,7 +42,12 @@ module Revere
     def self.request(verb, path, options={})
       uri = Addressable::URI.parse(File.join(BASE_URI, path))
       uri.query_values = { key: API_KEY, token: TOKEN }.merge(options)
+
+      Revere.logger.info "Performing request: #{verb.to_s.upcase} #{uri}"
+
       response = HTTP.request(verb, uri.to_s)
+
+      Revere.logger.info "Response #{response.code}, body: #{response.body}"
 
       if response.code == 200
         JSON.parse(response.to_s)

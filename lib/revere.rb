@@ -26,4 +26,8 @@ module Revere
     end
   end
 
+  def self.logger
+    @logger ||= Logger.new($stdout)
+  end
+
 end

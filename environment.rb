@@ -1,4 +1,5 @@
 $LOAD_PATH.unshift(File.expand_path("../lib", __FILE__))
+$stdout.sync = true
 
 require "bundler/setup"
 Bundler.setup

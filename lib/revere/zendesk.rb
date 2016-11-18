@@ -21,9 +21,14 @@ module Revere
     # template for zendesk requests
     def self.request(verb, path, data={})
       uri = Addressable::URI.parse(File.join(BASE_URI, path))
+
+      Revere.logger.info "Performing request: #{verb.to_s.upcase} #{uri} with data #{data.inspect}"
+
       response = HTTP
         .basic_auth(user: USER, pass: TOKEN)
         .request(verb, uri.to_s, json: data)
+
+      Revere.logger.info "Response #{response.code}, body: #{response.body}"
 
       if response.code == 200
         response
