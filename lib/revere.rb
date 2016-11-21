@@ -3,11 +3,18 @@ require 'yaml'
 require 'http'
 require 'addressable/uri'
 require 'verbose_hash_fetch'
+require 'raven'
 
 require 'revere/trello'
 require 'revere/zendesk'
 
 module Revere
+
+  def self.configure
+    Raven.configure do |config|
+      config.dsn = ENV["SENTRY_DSN"] if ENV["SENTRY_DSN"]
+    end
+  end
 
   def self.puts_trello_list_name_on_zendesk_ticket(card_id)
     # step 1. Find zendesk ticket ids

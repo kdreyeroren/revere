@@ -5,5 +5,4 @@ end
 
 task :environment do
   require_relative "environment"
-  require "revere"
 end

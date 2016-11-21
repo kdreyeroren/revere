@@ -10,3 +10,6 @@ if RACK_ENV != "production"
   require "dotenv"
   Dotenv.load(".env.#{RACK_ENV}", ".env")
 end
+
+require "revere"
+Revere.configure

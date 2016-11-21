@@ -9,6 +9,7 @@ gem "verbose_hash_fetch"
 gem "pry"
 gem "rake"
 gem "dotenv", groups: [:development, :test]
+gem "sentry-raven"
 
 group :development do
   gem "awesome_print"

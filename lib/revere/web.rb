@@ -1,5 +1,6 @@
 require 'sinatra'
-require 'revere'
+
+use Raven::Rack
 
 get '/' do
   erb :index
