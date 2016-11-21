@@ -25,7 +25,7 @@ live: &live
       reason_for_refund:
         id: 46945287
       trello_list_name:
-        id: 46456408
+        id: 46264128
 sandbox: &sandbox
   custom_fields:
     ticket:
