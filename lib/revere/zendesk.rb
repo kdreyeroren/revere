@@ -12,7 +12,7 @@ module Revere
         ticket: {
           custom_fields: [{
             id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-            value: trello_list_name
+            value: trello_list_name.downcase.gsub(/\W/, "_")
           }]
         }
       })

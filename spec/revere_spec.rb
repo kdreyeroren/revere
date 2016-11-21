@@ -57,7 +57,7 @@ RSpec.describe Revere do
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
     expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
       .to have_been_made
   end
 
@@ -70,10 +70,10 @@ RSpec.describe Revere do
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
     expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-    .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+    .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
     .to have_been_made
     expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/666.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
   end
 
   it "handles other types of attachments" do
@@ -94,7 +94,7 @@ RSpec.describe Revere do
     Revere.sync_tickets
 
     expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list name"}]}}.to_json))
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
       .to have_been_made
   end
 
