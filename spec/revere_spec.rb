@@ -98,4 +98,13 @@ RSpec.describe Revere do
       .to have_been_made
   end
 
+  it "does not crash when trying to update a closed ticket" do
+    stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1234.json")
+      .to_return(status: 422, body: {"error":"RecordInvalid","description":"Record validation errors","details":{"status":[{"description":"Status: closed prevents ticket update"}]}}.to_json)
+
+      Revere::Zendesk.modify_ticket_with_trello_list("1234", "list name")
+
+      # no error
+  end
+
 end

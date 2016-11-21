@@ -1,6 +1,9 @@
 module Revere
   module Zendesk
 
+    class ZendeskError < RuntimeError
+    end
+
     ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(RACK_ENV)
 
     BASE_URI = ENV.fetch("ZENDESK_BASE_URI")
@@ -16,6 +19,12 @@ module Revere
           }]
         }
       })
+    rescue ZendeskError => error
+      if error.message.include? "closed prevents ticket update"
+        # noop
+      else
+        raise
+      end
     end
 
     # template for zendesk requests
@@ -33,7 +42,7 @@ module Revere
       if response.code == 200
         response
       else
-        raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}, data:#{data.inspect}"
+        raise ZendeskError, "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}, data:#{data.inspect}"
       end
     end
 
