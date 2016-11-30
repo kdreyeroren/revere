@@ -10,6 +10,10 @@ get '/' do
   erb :index
 end
 
+get '/manifest.json' do
+  erb :manifest
+end
+
 post '/create_trello_webhook' do
   Revere::Trello.create_webhook("#{request.base_url}/trello")
 end
