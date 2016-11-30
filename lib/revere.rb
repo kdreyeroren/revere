@@ -32,7 +32,7 @@ module Revere
   end
 
   def self.logger
-    @logger ||= Logger.new($stdout)
+    @logger ||= (RACK_ENV == "test" ? Logger.new("log/test.log") : Logger.new($stdout))
   end
 
 end

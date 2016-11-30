@@ -77,6 +77,16 @@ RSpec.describe Revere do
     expect(zendesk_request("666", "list_name", "")).to have_been_made
   end
 
+  it "handles multiple github links" do
+    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issue/4242"}, {url: "github.com/issue/5"}])
+    stub_trello_list("trello_card_id", {name: "list name"})
+    stub_zendesk_ticket("1337")
+
+    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
+
+    expect(zendesk_request("1337", "list_name", "github.com/issue/4242\ngithub.com/issue/5")).to have_been_made
+  end
+
   it "handles other types of attachments" do
     stub_trello_attachment("trello_card_id", [{url: "boston.com/imwithstupid"}])
     stub_trello_list("trello_card_id", {name: "list name"})

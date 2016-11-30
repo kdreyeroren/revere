@@ -2,6 +2,10 @@ require 'sinatra'
 
 use Raven::Rack
 
+before do
+  env["rack.logger"] = Revere.logger
+end
+
 get '/' do
   erb :index
 end
