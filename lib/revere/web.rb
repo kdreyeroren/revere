@@ -19,6 +19,6 @@ post '/trello' do
   request_payload = JSON.parse request.body.read
   logger.info("payload:#{request_payload.inspect}")
   card_id = request_payload.dig("action", "data", "card", "id")
-  Revere.puts_trello_list_name_on_zendesk_ticket(card_id)
+  Revere.sync_single_ticket(card_id)
   200
 end

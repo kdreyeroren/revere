@@ -10,13 +10,19 @@ module Revere
     USER = ENV.fetch("ZENDESK_USER")
     TOKEN = ENV.fetch("ZENDESK_TOKEN")
 
-    def self.modify_ticket_with_trello_list(ticket_id, trello_list_name)
+    def self.update_ticket(ticket_id, trello_list_name: "", github_links: [])
       request(:put, "tickets/#{ticket_id}.json", {
         ticket: {
-          custom_fields: [{
-            id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-            value: trello_list_name.downcase.gsub(/\W/, "_")
-          }]
+          custom_fields: [
+            {
+              id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
+              value: trello_list_name.downcase.gsub(/\W/, "_")
+            },
+            {
+              id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
+              value: github_links.join("\n")
+            }
+          ]
         }
       })
     rescue ZendeskError => error

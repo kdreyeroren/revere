@@ -16,20 +16,18 @@ module Revere
     end
   end
 
-  def self.puts_trello_list_name_on_zendesk_ticket(card_id)
-    # step 1. Find zendesk ticket ids
-    ticket_ids = Trello.get_zendesk_ticket_ids_from_trello_attachments(card_id)
-    # step 2. Find list name
+  def self.sync_single_ticket(card_id)
+    card = Trello.get_card(card_id)
     trello_list_name = Trello.get_list_name(card_id)
-    # step 3. Send that name to Zendesk tickets
-    ticket_ids.each do |ticket_id|
-      Zendesk.modify_ticket_with_trello_list(ticket_id, trello_list_name)
+
+    card.zendesk_ticket_ids.each do |ticket_id|
+      Zendesk.update_ticket(ticket_id, trello_list_name: trello_list_name, github_links: card.github_links)
     end
   end
 
-  def self.sync_tickets
+  def self.sync_multiple_tickets
     Trello.get_card_ids.each do |card_id|
-      puts_trello_list_name_on_zendesk_ticket(card_id)
+      sync_single_ticket(card_id)
     end
   end
 

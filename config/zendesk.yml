@@ -51,6 +51,8 @@ sandbox: &sandbox
         id: 46945267
       trello_list_name:
         id: 46456408
+      github_links:
+        id: 47614828
 development:
   <<: *sandbox
 test:

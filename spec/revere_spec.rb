@@ -30,6 +30,12 @@ RSpec.describe Revere do
       .to_return(status: 200, body: body.to_json, headers: {})
   end
 
+  def zendesk_request(ticket_id, list_name, github_url)
+    a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
+  end
+
+
   it "creates a trello webhook" do
     allow(Revere::Trello).to receive(:create_webhook).and_return("hello")
 
@@ -50,15 +56,13 @@ RSpec.describe Revere do
   end
 
   it "does everything" do
-    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}])
+    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issues/1337"}])
     stub_trello_list("trello_card_id", {name: "list name"})
     stub_zendesk_ticket("1337")
 
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
-    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
-      .to have_been_made
+    expect(zendesk_request("1337", "list_name", "github.com/issues/1337")).to have_been_made
   end
 
   it "handles multiple zendesk attachments" do
@@ -69,11 +73,8 @@ RSpec.describe Revere do
 
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
-    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-    .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
-    .to have_been_made
-    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/666.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
+    expect(zendesk_request("1337", "list_name", "")).to have_been_made
+    expect(zendesk_request("666", "list_name", "")).to have_been_made
   end
 
   it "handles other types of attachments" do
@@ -91,20 +92,19 @@ RSpec.describe Revere do
     stub_trello_list("1234", {name: "list name"})
     stub_zendesk_ticket("1337")
 
-    Revere.sync_tickets
+    Revere.sync_multiple_tickets
 
-    expect(a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: "list_name"}]}}.to_json))
-      .to have_been_made
+    expect(zendesk_request("1337", "list_name", "")).to have_been_made
   end
 
   it "does not crash when trying to update a closed ticket" do
     stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1234.json")
       .to_return(status: 422, body: {"error":"RecordInvalid","description":"Record validation errors","details":{"status":[{"description":"Status: closed prevents ticket update"}]}}.to_json)
 
-      Revere::Zendesk.modify_ticket_with_trello_list("1234", "list name")
+      Revere::Zendesk.update_ticket("1234", trello_list_name: "list name")
 
       # no error
   end
+
 
 end

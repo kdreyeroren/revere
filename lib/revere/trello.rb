@@ -7,6 +7,29 @@ module Revere
     TOKEN = ENV.fetch("TRELLO_TOKEN")
     BASE_URI = ENV.fetch("TRELLO_BASE_URI")
 
+    class Card
+
+      def initialize(body)
+        @body = body
+      end
+
+      def zendesk_ticket_ids
+        zendesk_attachments = @body.find_all { |i| i["url"].include? "zendesk.com" }
+        zendesk_attachments.map { |i| i["url"].split("/").last}
+      end
+
+      def github_links
+        github_attachments = @body.find_all { |i| i["url"].include? "github.com" }
+        github_attachments.map { |i| i["url"] }
+      end
+
+    end
+
+    def self.get_card(card_id)
+      body = request(:get, "cards/#{card_id}/attachments")
+      Card.new(body)
+    end
+
     # pulls out the list name
     def self.get_list_name(card_id)
       body = request(:get, "cards/#{card_id}/list")
@@ -19,6 +42,15 @@ module Revere
 
       zendesk_attachments = body.find_all { |i| i["url"].include? "zendesk.com" }
       zendesk_attachments.map { |i| i["url"].split("/").last}
+
+    end
+
+    def self.get_github_links_from_trello_attachments(card_id)
+
+      body = request(:get, "cards/#{card_id}/attachments")
+
+      github_attachments = body.find_all { |i| i["url"].include? "github.com" }
+      github_attachments.map { |i| i["url"] }
 
     end
 
