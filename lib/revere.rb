@@ -32,7 +32,17 @@ module Revere
   end
 
   def self.logger
-    @logger ||= (RACK_ENV == "test" ? Logger.new("log/test.log") : Logger.new($stdout))
+    @logger ||= build_logger
   end
+
+  def self.build_logger
+    if RACK_ENV == "test"
+      FileUtils.mkdir_p(APP_ROOT.join("log"))
+      Logger.new(APP_ROOT.join("log/test.log"))
+    else
+      Logger.new($stdout)
+    end
+  end
+
 
 end

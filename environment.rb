@@ -5,6 +5,7 @@ require "bundler/setup"
 Bundler.setup
 
 RACK_ENV = ENV.fetch("RACK_ENV", "development")
+APP_ROOT = Pathname(File.expand_path("../", __FILE__))
 
 if RACK_ENV != "production"
   require "dotenv"
