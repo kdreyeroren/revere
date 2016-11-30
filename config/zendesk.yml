@@ -26,6 +26,8 @@ live: &live
         id: 46945287
       trello_list_name:
         id: 46264128
+      github_links:
+        id: 47771307
 sandbox: &sandbox
   custom_fields:
     ticket:
