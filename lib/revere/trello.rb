@@ -36,24 +36,6 @@ module Revere
       body.fetch("name")
     end
 
-    def self.get_zendesk_ticket_ids_from_trello_attachments(card_id)
-
-      body = request(:get, "cards/#{card_id}/attachments")
-
-      zendesk_attachments = body.find_all { |i| i["url"].include? "zendesk.com" }
-      zendesk_attachments.map { |i| i["url"].split("/").last}
-
-    end
-
-    def self.get_github_links_from_trello_attachments(card_id)
-
-      body = request(:get, "cards/#{card_id}/attachments")
-
-      github_attachments = body.find_all { |i| i["url"].include? "github.com" }
-      github_attachments.map { |i| i["url"] }
-
-    end
-
     # triggers the webhook
     def self.create_webhook(callback_url)
       response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID)
