@@ -25,6 +25,10 @@ module Revere
 
     end
 
+    def self.write_comment(card_id, comment_text)
+      request(:post, "cards/#{card_id}/actions/comments", text: comment_text)
+    end
+
     def self.get_card(card_id)
       body = request(:get, "cards/#{card_id}/attachments")
       Card.new(body)
