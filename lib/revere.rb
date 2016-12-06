@@ -36,7 +36,9 @@ module Revere
     comment_text = comments.map { |i| i.dig("data", "text") }
     if comment_text.none? { |comment| comment =~ %r{School ID: \d+} }
       school_id = Zendesk.school_id(ticket_id)
-      Trello.write_comment(card_id, "School ID: #{school_id}")
+      if school_id
+        Trello.write_comment(card_id, "School ID: #{school_id}")
+      end
     end
   end
 

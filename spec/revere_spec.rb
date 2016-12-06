@@ -160,6 +160,20 @@ RSpec.describe Revere do
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")).to_not have_been_made
   end
 
+  it "does nothing if there's no school ID" do
+    card_id = "trello_card_id"
+    ticket_id = "zendesk_ticket_id"
 
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
+      .to_return(body: {"actions" => []}.to_json)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: ""}]}}.to_json)
+    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")
+      .to_return(status: 200, body: "{}")
+
+    Revere.update_trello_card(card_id, ticket_id)
+
+    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to_not have_been_made
+  end
 
 end
