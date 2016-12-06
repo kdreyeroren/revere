@@ -60,7 +60,7 @@ RSpec.describe Revere do
     expect(last_response.status).to eq 200
   end
 
-  it "does everything" do
+  it "updates single zendesk ticket" do
     stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issues/1337"}])
     stub_trello_list("trello_card_id", {name: "list name"})
     stub_zendesk_ticket("1337")
