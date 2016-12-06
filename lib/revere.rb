@@ -31,6 +31,15 @@ module Revere
     end
   end
 
+  def self.update_trello_card(card_id, ticket_id)
+    comments = Trello.get_comments(card_id).comments
+    comment_text = comments.map { |i| i.dig("data", "text") }
+    if comment_text.none? { |comment| comment =~ %r{School ID: \d+} }
+      school_id = Zendesk.school_id(ticket_id)
+      Trello.write_comment(card_id, "School ID: #{school_id}")
+    end
+  end
+
   def self.logger
     @logger ||= build_logger
   end

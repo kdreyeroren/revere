@@ -33,6 +33,12 @@ module Revere
       end
     end
 
+    def self.school_id(ticket_id)
+      body = request(:get, "tickets/#{ticket_id}.json")
+      parsed_body = JSON.parse(body)
+      parsed_body.dig("ticket", "custom_fields").find { |i| i["id"] == 45144647 }.fetch("value")
+    end
+
     # template for zendesk requests
     def self.request(verb, path, data={})
       uri = Addressable::URI.parse(File.join(BASE_URI, path))

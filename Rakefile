@@ -6,3 +6,10 @@ end
 task :environment do
   require_relative "environment"
 end
+
+desc "runs console"
+task :console => :environment do
+  require "pry"
+  require "awesome_print"
+  Pry.start(Revere)
+end

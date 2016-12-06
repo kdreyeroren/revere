@@ -23,14 +23,25 @@ module Revere
         github_attachments.map { |i| i["url"] }
       end
 
+      def comments
+        comment_cards_array = @body.fetch("actions")
+        comment_cards_array.find_all { |i| i["type"] == "commentCard" }
+      end
+
+    end
+
+    
+    def self.get_card(card_id)
+      body = request(:get, "cards/#{   card_id}/attachments")
+      Card.new(body)
     end
 
     def self.write_comment(card_id, comment_text)
       request(:post, "cards/#{card_id}/actions/comments", text: comment_text)
     end
 
-    def self.get_card(card_id)
-      body = request(:get, "cards/#{card_id}/attachments")
+    def self.get_comments(card_id)
+      body = request(:get, "cards/#{card_id}", { "actions" => "commentCard" })
       Card.new(body)
     end
 

@@ -35,6 +35,11 @@ RSpec.describe Revere do
       .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
   end
 
+  def trello_comment_request(card_id, comment_text)
+    a_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
+      .with()
+  end
+
 
   it "creates a trello webhook" do
     allow(Revere::Trello).to receive(:create_webhook).and_return("hello")
@@ -115,6 +120,46 @@ RSpec.describe Revere do
 
       # no error
   end
+
+  it "puts the school id in a trello comment" do
+    card_id = "trello_card_id"
+    ticket_id = "zendesk_ticket_id"
+
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
+      .to_return(body: {"actions" => []}.to_json)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
+    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")
+      .to_return(status: 200, body: "{}")
+
+    Revere.update_trello_card(card_id, ticket_id)
+
+    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to have_been_made
+  end
+
+  it "doesn't put the school id in the card if it's already there" do
+    card_id = "trello_card_id"
+    ticket_id = "zendesk_ticket_id"
+
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
+      .to_return(body:
+        {
+          actions: [
+            {
+              data: {
+                text: "School ID: 45678"
+              },
+              type: "commentCard"
+            }
+          ]
+        }.to_json
+      )
+
+    Revere.update_trello_card(card_id, ticket_id)
+
+    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")).to_not have_been_made
+  end
+
 
 
 end
