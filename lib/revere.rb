@@ -22,6 +22,7 @@ module Revere
 
     card.zendesk_ticket_ids.each do |ticket_id|
       Zendesk.update_ticket(ticket_id, trello_list_name: trello_list_name, github_links: card.github_links)
+      update_trello_card(card_id, ticket_id)
     end
   end
 

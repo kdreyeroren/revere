@@ -30,6 +30,21 @@ RSpec.describe Revere do
       .to_return(status: 200, body: body.to_json, headers: {})
   end
 
+  def stub_trello_comment_card(card_id)
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/#{card_id}\?actions=commentCard")
+      .to_return(body: {"actions" => []}.to_json)
+  end
+
+  def stub_trello_posted_comment(card_id)
+    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
+      .to_return(status: 200, body: "{}")
+  end
+
+  def stub_zendesk_ticket_with_school(ticket_id)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
+  end
+
   def zendesk_request(ticket_id, list_name, github_url)
     a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
       .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
@@ -61,9 +76,13 @@ RSpec.describe Revere do
   end
 
   it "updates single zendesk ticket" do
+    ticket_id = "1337"
     stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issues/1337"}])
     stub_trello_list("trello_card_id", {name: "list name"})
     stub_zendesk_ticket("1337")
+    stub_trello_comment_card("trello_card_id")
+    stub_zendesk_ticket_with_school(ticket_id)
+    stub_trello_posted_comment("trello_card_id")
 
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
@@ -71,10 +90,15 @@ RSpec.describe Revere do
   end
 
   it "handles multiple zendesk attachments" do
-    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "zendesk.com/ticket/666"}])
-    stub_trello_list("trello_card_id", {name: "list name"})
+    trello_card_id = "trello_card_id"
+    stub_trello_attachment(trello_card_id, [{url: "zendesk.com/ticket/1337"}, {url: "zendesk.com/ticket/666"}])
+    stub_trello_list(trello_card_id, {name: "list name"})
     stub_zendesk_ticket("1337")
     stub_zendesk_ticket("666")
+    stub_trello_comment_card(trello_card_id)
+    stub_zendesk_ticket_with_school("1337")
+    stub_zendesk_ticket_with_school("666")
+    stub_trello_posted_comment(trello_card_id)
 
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
@@ -83,9 +107,14 @@ RSpec.describe Revere do
   end
 
   it "handles multiple github links" do
-    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issue/4242"}, {url: "github.com/issue/5"}])
-    stub_trello_list("trello_card_id", {name: "list name"})
-    stub_zendesk_ticket("1337")
+    trello_card_id = "trello_card_id"
+    zendesk_ticket_id = "1337"
+    stub_trello_attachment(trello_card_id, [{url: "zendesk.com/ticket/#{zendesk_ticket_id}"}, {url: "github.com/issue/4242"}, {url: "github.com/issue/5"}])
+    stub_trello_list(trello_card_id, {name: "list name"})
+    stub_zendesk_ticket(zendesk_ticket_id)
+    stub_trello_comment_card(trello_card_id)
+    stub_zendesk_ticket_with_school(zendesk_ticket_id)
+    stub_trello_posted_comment(trello_card_id)
 
     post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
 
@@ -106,6 +135,12 @@ RSpec.describe Revere do
     stub_trello_attachment("1234", [{url: "zendesk.com/ticket/1337"}])
     stub_trello_list("1234", {name: "list name"})
     stub_zendesk_ticket("1337")
+    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/1234\?actions=commentCard")
+      .to_return(body: {"actions" => []}.to_json)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
+    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/1234/actions/comments")
+      .to_return(status: 200, body: "{}")
 
     Revere.sync_multiple_tickets
 
@@ -125,12 +160,9 @@ RSpec.describe Revere do
     card_id = "trello_card_id"
     ticket_id = "zendesk_ticket_id"
 
-    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
-      .to_return(body: {"actions" => []}.to_json)
-    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
-    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")
-      .to_return(status: 200, body: "{}")
+    stub_trello_comment_card(card_id)
+    stub_zendesk_ticket_with_school(ticket_id)
+    stub_trello_posted_comment(card_id)
 
     Revere.update_trello_card(card_id, ticket_id)
 
@@ -164,12 +196,10 @@ RSpec.describe Revere do
     card_id = "trello_card_id"
     ticket_id = "zendesk_ticket_id"
 
-    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
-      .to_return(body: {"actions" => []}.to_json)
+    stub_trello_comment_card(card_id)
     stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
       .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: ""}]}}.to_json)
-    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")
-      .to_return(status: 200, body: "{}")
+      stub_trello_posted_comment(card_id)
 
     Revere.update_trello_card(card_id, ticket_id)
 
