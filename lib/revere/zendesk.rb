@@ -36,7 +36,7 @@ module Revere
     def self.school_id(ticket_id)
       body = request(:get, "tickets/#{ticket_id}.json")
       parsed_body = JSON.parse(body)
-      parsed_body.dig("ticket", "custom_fields").find { |i| i["id"] == 45144647 }.fetch("value")
+      parsed_body.dig("ticket", "custom_fields").find { |i| i["id"] == ZENDESK_CONFIG.dig("custom_fields", "ticket", "school_id", "id") }.fetch("value")
     end
 
     # template for zendesk requests
