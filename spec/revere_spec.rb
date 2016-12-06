@@ -151,9 +151,9 @@ RSpec.describe Revere do
     stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/1234.json")
       .to_return(status: 422, body: {"error":"RecordInvalid","description":"Record validation errors","details":{"status":[{"description":"Status: closed prevents ticket update"}]}}.to_json)
 
-      Revere::Zendesk.update_ticket("1234", trello_list_name: "list name")
+    Revere::Zendesk.update_ticket("1234", trello_list_name: "list name")
 
-      # no error
+    # no error
   end
 
   it "puts the school id in a trello comment" do
@@ -164,7 +164,7 @@ RSpec.describe Revere do
     stub_zendesk_ticket_with_school(ticket_id)
     stub_trello_posted_comment(card_id)
 
-    Revere.update_trello_card(card_id, ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to have_been_made
   end
@@ -187,7 +187,7 @@ RSpec.describe Revere do
         }.to_json
       )
 
-    Revere.update_trello_card(card_id, ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")).to_not have_been_made
   end
@@ -199,9 +199,9 @@ RSpec.describe Revere do
     stub_trello_comment_card(card_id)
     stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
       .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: ""}]}}.to_json)
-      stub_trello_posted_comment(card_id)
+    stub_trello_posted_comment(card_id)
 
-    Revere.update_trello_card(card_id, ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to_not have_been_made
   end

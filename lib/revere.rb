@@ -18,11 +18,14 @@ module Revere
 
   def self.sync_single_ticket(card_id)
     card = Trello.get_card(card_id)
-    trello_list_name = Trello.get_list_name(card_id)
 
     card.zendesk_ticket_ids.each do |ticket_id|
-      Zendesk.update_ticket(ticket_id, trello_list_name: trello_list_name, github_links: card.github_links)
-      update_trello_card(card_id, ticket_id)
+      Zendesk.update_ticket(
+        ticket_id,
+        trello_list_name:  card.list_name,
+        github_links:      card.github_links
+      )
+      update_trello_card(card, ticket_id)
     end
   end
 
@@ -32,13 +35,12 @@ module Revere
     end
   end
 
-  def self.update_trello_card(card_id, ticket_id)
-    comments = Trello.get_comments(card_id).comments
-    comment_text = comments.map { |i| i.dig("data", "text") }
-    if comment_text.none? { |comment| comment =~ %r{School ID: \d+} }
+  def self.update_trello_card(card, ticket_id)
+
+    if card.comments.none?(&:school_id?)
       school_id = Zendesk.school_id(ticket_id)
       if school_id
-        Trello.write_comment(card_id, "School ID: #{school_id}")
+        card.write_comment("School ID: #{school_id}")
       end
     end
   end

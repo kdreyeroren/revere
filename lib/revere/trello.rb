@@ -3,52 +3,79 @@ module Revere
   module Trello
 
     BOARD_ID = ENV.fetch("TRELLO_BOARD_ID")
-    API_KEY = ENV.fetch("TRELLO_API_KEY")
-    TOKEN = ENV.fetch("TRELLO_TOKEN")
+    API_KEY  = ENV.fetch("TRELLO_API_KEY")
+    TOKEN    = ENV.fetch("TRELLO_TOKEN")
     BASE_URI = ENV.fetch("TRELLO_BASE_URI")
 
     class Card
+
+      attr_reader :id
+
+      def initialize(id)
+        @id = id
+      end
+
+      def zendesk_ticket_ids
+        attachment_request_body
+          .find_all { |i| i["url"].include? "zendesk.com" }
+          .map { |i| i["url"].split("/").last}
+      end
+
+      def github_links
+        attachment_request_body
+          .find_all { |i| i["url"].include? "github.com" }
+          .map { |i| i["url"] }
+      end
+
+      def comments
+        comment_request_body
+          .fetch("actions")
+          .find_all { |i| i["type"] == "commentCard" }
+          .map { |data| Comment.new(data) }
+      end
+
+      def list_name
+        list_request.fetch("name")
+      end
+
+      def write_comment(text)
+        Trello.request(:post, "cards/#{id}/actions/comments", text: text)
+      end
+
+      private
+
+      def attachment_request_body
+        @attachment_request_body ||= Trello.request(:get, "cards/#{id}/attachments")
+      end
+
+      def comment_request_body
+        @comment_request_body ||= Trello.request(:get, "cards/#{id}", actions: "commentCard")
+      end
+
+      def list_request
+        @list_request ||= Trello.request(:get, "cards/#{id}/list")
+      end
+
+    end
+
+    class Comment
 
       def initialize(body)
         @body = body
       end
 
-      def zendesk_ticket_ids
-        zendesk_attachments = @body.find_all { |i| i["url"].include? "zendesk.com" }
-        zendesk_attachments.map { |i| i["url"].split("/").last}
+      def text
+        @body.dig("data", "text")
       end
 
-      def github_links
-        github_attachments = @body.find_all { |i| i["url"].include? "github.com" }
-        github_attachments.map { |i| i["url"] }
-      end
-
-      def comments
-        comment_cards_array = @body.fetch("actions")
-        comment_cards_array.find_all { |i| i["type"] == "commentCard" }
+      def school_id?
+        text =~ /\ASchool ID: \d+\z/
       end
 
     end
 
-    
     def self.get_card(card_id)
-      body = request(:get, "cards/#{   card_id}/attachments")
-      Card.new(body)
-    end
-
-    def self.write_comment(card_id, comment_text)
-      request(:post, "cards/#{card_id}/actions/comments", text: comment_text)
-    end
-
-    def self.get_comments(card_id)
-      body = request(:get, "cards/#{card_id}", { "actions" => "commentCard" })
-      Card.new(body)
-    end
-
-    # pulls out the list name
-    def self.get_list_name(card_id)
-      body = request(:get, "cards/#{card_id}/list")
-      body.fetch("name")
+      Card.new(card_id)
     end
 
     # triggers the webhook
