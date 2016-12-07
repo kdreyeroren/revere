@@ -68,10 +68,6 @@ module Revere
         @body.dig("data", "text")
       end
 
-      def school_id?
-        text =~ /\ASchool ID: \d+\z/
-      end
-
     end
 
     def self.get_card(card_id)

@@ -37,12 +37,12 @@ module Revere
 
   def self.update_trello_card(card, ticket_id)
 
-    if card.comments.none?(&:school_id?)
-      school_id = Zendesk.school_id(ticket_id)
-      if school_id
-        card.write_comment("School ID: #{school_id}")
-      end
+    school_id = Zendesk.school_id(ticket_id)
+
+    if school_id && card.comments.none? { |comment| comment.text =~ /School ID: #{school_id}\b/ }
+      card.write_comment("[School ID: #{school_id}](https://staff.teachable.com/schools/#{school_id})")
     end
+
   end
 
   def self.logger
