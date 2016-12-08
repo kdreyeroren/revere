@@ -30,6 +30,21 @@ RSpec.describe Revere do
       .to_return(status: 200, body: body.to_json, headers: {})
   end
 
+  def stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "#{school_id}"}]}}.to_json)
+  end
+
+  def stub_trello_posted_attachments(card_id)
+    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/attachments\?")
+      .to_return(status: 200, body: "{}")
+  end
+
+  def zendesk_request(ticket_id, list_name, github_url)
+    a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
+  end
+
   def stub_trello_comment_card(card_id)
     stub_request(:get, %r"#{TRELLO_BASE_URI}cards/#{card_id}\?actions=commentCard")
       .to_return(body: {"actions" => []}.to_json)
@@ -39,17 +54,6 @@ RSpec.describe Revere do
     stub_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
       .to_return(status: 200, body: "{}")
   end
-
-  def stub_zendesk_ticket_with_school(ticket_id, school_id)
-    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "#{school_id}"}]}}.to_json)
-  end
-
-  def zendesk_request(ticket_id, list_name, github_url)
-    a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
-  end
-
   def trello_comment_request(card_id, comment_text)
     a_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
       .with()
@@ -77,48 +81,55 @@ RSpec.describe Revere do
 
   it "updates single zendesk ticket" do
     ticket_id = "1337"
-    stub_trello_attachment("trello_card_id", [{url: "zendesk.com/ticket/1337"}, {url: "github.com/issues/1337"}])
-    stub_trello_list("trello_card_id", {name: "list name"})
-    stub_zendesk_ticket("1337")
-    stub_trello_comment_card("trello_card_id")
-    stub_zendesk_ticket_with_school(ticket_id, "12345")
-    stub_trello_posted_comment("trello_card_id")
+    school_id = "12345"
+    card_id = "trello_card_id"
+    list_name = "list_name"
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "github.com/issues/#{ticket_id}"}])
+    stub_trello_list(card_id, {name: list_name})
+    stub_zendesk_ticket(ticket_id)
+    stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_trello_posted_attachments(card_id)
 
-    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: card_id}}}}.to_json
 
-    expect(zendesk_request("1337", "list_name", "github.com/issues/1337")).to have_been_made
+    expect(zendesk_request(ticket_id, list_name, "github.com/issues/#{ticket_id}")).to have_been_made
   end
 
   it "handles multiple zendesk attachments" do
-    trello_card_id = "trello_card_id"
-    stub_trello_attachment(trello_card_id, [{url: "zendesk.com/ticket/1337"}, {url: "zendesk.com/ticket/666"}])
-    stub_trello_list(trello_card_id, {name: "list name"})
-    stub_zendesk_ticket("1337")
-    stub_zendesk_ticket("666")
-    stub_trello_comment_card(trello_card_id)
-    stub_zendesk_ticket_with_school("1337", "12345")
-    stub_zendesk_ticket_with_school("666", "12345")
-    stub_trello_posted_comment(trello_card_id)
+    card_id = "trello_card_id"
+    ticket_id_1 = "1337"
+    ticket_id_2 = "666"
+    school_id = "12345"
+    list_name = "list_name"
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id_1}"}, {url: "zendesk.com/ticket/#{ticket_id_2}"}])
+    stub_trello_list(card_id, {name: list_name})
+    stub_zendesk_ticket(ticket_id_1)
+    stub_zendesk_ticket(ticket_id_2)
+    stub_zendesk_ticket_with_school(ticket_id_1, school_id)
+    stub_zendesk_ticket_with_school(ticket_id_2, school_id)
+    stub_trello_posted_attachments(card_id)
 
-    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: card_id}}}}.to_json
 
-    expect(zendesk_request("1337", "list_name", "")).to have_been_made
-    expect(zendesk_request("666", "list_name", "")).to have_been_made
+    expect(zendesk_request(ticket_id_1, list_name, "")).to have_been_made
+    expect(zendesk_request(ticket_id_2, list_name, "")).to have_been_made
   end
 
   it "handles multiple github links" do
-    trello_card_id = "trello_card_id"
-    zendesk_ticket_id = "1337"
-    stub_trello_attachment(trello_card_id, [{url: "zendesk.com/ticket/#{zendesk_ticket_id}"}, {url: "github.com/issue/4242"}, {url: "github.com/issue/5"}])
-    stub_trello_list(trello_card_id, {name: "list name"})
-    stub_zendesk_ticket(zendesk_ticket_id)
-    stub_trello_comment_card(trello_card_id)
-    stub_zendesk_ticket_with_school(zendesk_ticket_id, "12345")
-    stub_trello_posted_comment(trello_card_id)
+    card_id = "trello_card_id"
+    ticket_id = "1337"
+    list_name = "list name"
+    school_id = "12345"
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "github.com/issue/4242"}, {url: "github.com/issue/5"}])
+    stub_trello_list(card_id, {name: list_name})
+    stub_zendesk_ticket(ticket_id)
+    stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_trello_posted_attachments(card_id)
 
-    post "/trello", {action: {data: {card: {id: "trello_card_id"}}}}.to_json
+    post "/trello", {action: {data: {card: {id: card_id}}}}.to_json
 
-    expect(zendesk_request("1337", "list_name", "github.com/issue/4242\ngithub.com/issue/5")).to have_been_made
+    # why doesn't using list_name instead of "list_name" work here??
+    expect(zendesk_request(ticket_id, "list_name", "github.com/issue/4242\ngithub.com/issue/5")).to have_been_made
   end
 
   it "handles other types of attachments" do
@@ -131,16 +142,18 @@ RSpec.describe Revere do
   end
 
   it "syncs all the cards" do
-    stub_trello_board([{id: 1234}])
-    stub_trello_attachment("1234", [{url: "zendesk.com/ticket/1337"}])
-    stub_trello_list("1234", {name: "list name"})
-    stub_zendesk_ticket("1337")
-    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/1234\?actions=commentCard")
-      .to_return(body: {"actions" => []}.to_json)
-    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/1337.json")
-      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
-    stub_request(:post, %r"#{TRELLO_BASE_URI}cards/1234/actions/comments")
-      .to_return(status: 200, body: "{}")
+    board_id = "1234"
+    card_id = "trello_card_id"
+    ticket_id = "1337"
+    list_name = "list name"
+    stub_trello_board([{id: board_id}])
+    stub_trello_attachment(board_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
+    stub_trello_list(board_id, {name: list_name})
+    stub_zendesk_ticket(ticket_id)
+    stub_trello_posted_attachments(board_id)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+       .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "12345"}]}}.to_json)
 
     Revere.sync_multiple_tickets
 
@@ -156,41 +169,31 @@ RSpec.describe Revere do
     # no error
   end
 
-  it "puts the school id in a trello comment" do
+  it "puts the school id in a trello attachment" do
     card_id = "trello_card_id"
     ticket_id = "zendesk_ticket_id"
+    school_id = "12345"
 
-    stub_trello_comment_card(card_id)
-    stub_zendesk_ticket_with_school(ticket_id, "12345")
-    stub_trello_posted_comment(card_id)
+    stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
+    stub_trello_posted_attachments(card_id)
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
 
-    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text:  "[School ID: 12345](https://staff.teachable.com/schools/12345)"})).to have_been_made
+    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, url: "https://staff.teachable.com/schools/12345", name: "School ID: #{school_id}"})).to have_been_made
   end
 
   it "doesn't put the school id in the card if it's already there" do
     card_id = "trello_card_id"
     ticket_id = "zendesk_ticket_id"
+    school_id = "45678"
 
-    stub_request(:get, %r"#{TRELLO_BASE_URI}cards/trello_card_id\?actions=commentCard")
-      .to_return(body:
-        {
-          actions: [
-            {
-              data: {
-                text: "School ID: 45678"
-              },
-              type: "commentCard"
-            }
-          ]
-        }.to_json
-      )
-    stub_zendesk_ticket_with_school(ticket_id, "45678")
+    stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "https://staff.teachable.com/schools/#{school_id}"}])
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
 
-    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments")).to_not have_been_made
+    expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/attachments")).to_not have_been_made
   end
 
   it "does nothing if there's no school ID" do

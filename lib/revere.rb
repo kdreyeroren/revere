@@ -39,9 +39,17 @@ module Revere
 
     school_id = Zendesk.school_id(ticket_id)
 
-    if school_id && card.comments.none? { |comment| comment.text =~ /School ID: #{school_id}\b/ }
-      card.write_comment("[School ID: #{school_id}](https://staff.teachable.com/schools/#{school_id})")
+    return if !school_id || school_id == ""
+
+    url = "https://staff.teachable.com/schools/#{school_id}"
+
+    if card.school_id_urls.none? { |i| i == url }
+      card.create_school_attachment(url, "School ID: #{school_id}")
     end
+
+    # if school_id && card.comments.none? { |comment| comment.text =~ /School ID: #{school_id}\b/ }
+    #   card.write_comment("[School ID: #{school_id}](https://staff.teachable.com/schools/#{school_id})")
+    # end
 
   end
 

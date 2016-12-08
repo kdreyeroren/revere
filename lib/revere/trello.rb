@@ -18,7 +18,7 @@ module Revere
       def zendesk_ticket_ids
         attachment_request_body
           .find_all { |i| i["url"].include? "zendesk.com" }
-          .map { |i| i["url"].split("/").last}
+          .map { |i| i["url"].split("/").last }
       end
 
       def github_links
@@ -27,11 +27,14 @@ module Revere
           .map { |i| i["url"] }
       end
 
-      def comments
-        comment_request_body
-          .fetch("actions")
-          .find_all { |i| i["type"] == "commentCard" }
-          .map { |data| Comment.new(data) }
+      def school_id_urls
+        attachment_request_body
+        .find_all { |i| i["url"].include? "staff.teachable.com" }
+        .map { |i| i["url"] }
+      end
+
+      def create_school_attachment(url, name)
+        Trello.request(:post, "cards/#{id}/attachments", url: url, name: name)
       end
 
       def list_name
@@ -40,6 +43,13 @@ module Revere
 
       def write_comment(text)
         Trello.request(:post, "cards/#{id}/actions/comments", text: text)
+      end
+
+      def comments
+        comment_request_body
+          .fetch("actions")
+          .find_all { |i| i["type"] == "commentCard" }
+          .map { |data| Comment.new(data) }
       end
 
       private
@@ -57,6 +67,7 @@ module Revere
       end
 
     end
+
 
     class Comment
 
