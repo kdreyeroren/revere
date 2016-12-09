@@ -25,10 +25,9 @@ module Revere
         trello_list_name:  card.list_name,
         github_links:      card.github_links
       )
-      update_trello_card(card, ticket_id)
     end
 
-    school_ids = card.zendesk_ticket_ids.map { |ticket_id|
+    school_ids = card.zendesk_ticket_ids.uniq.map { |ticket_id|
       Zendesk.school_id(ticket_id)
     }.compact.reject(&:empty?).uniq
 
