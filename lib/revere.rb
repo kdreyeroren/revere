@@ -27,6 +27,14 @@ module Revere
       )
       update_trello_card(card, ticket_id)
     end
+
+    school_ids = card.zendesk_ticket_ids.map { |ticket_id|
+      Zendesk.school_id(ticket_id)
+    }.compact.reject(&:empty?).uniq
+
+    school_ids.each do |school_id|
+      update_trello_card(card, school_id)
+    end
   end
 
   def self.sync_multiple_tickets
@@ -35,22 +43,12 @@ module Revere
     end
   end
 
-  def self.update_trello_card(card, ticket_id)
-
-    school_id = Zendesk.school_id(ticket_id)
-
+  def self.update_trello_card(card, school_id)
     return if !school_id || school_id == ""
-
     url = "https://staff.teachable.com/schools/#{school_id}"
-
     if card.school_id_urls.none? { |i| i == url }
       card.create_school_attachment(url, "School ID: #{school_id}")
     end
-
-    # if school_id && card.comments.none? { |comment| comment.text =~ /School ID: #{school_id}\b/ }
-    #   card.write_comment("[School ID: #{school_id}](https://staff.teachable.com/schools/#{school_id})")
-    # end
-
   end
 
   def self.logger
