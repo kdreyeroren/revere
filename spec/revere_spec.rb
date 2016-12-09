@@ -174,11 +174,10 @@ RSpec.describe Revere do
     ticket_id = "zendesk_ticket_id"
     school_id = "12345"
 
-    stub_zendesk_ticket_with_school(ticket_id, school_id)
     stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
     stub_trello_posted_attachments(card_id)
 
-    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, url: "https://staff.teachable.com/schools/12345", name: "School ID: #{school_id}"})).to have_been_made
   end
@@ -188,10 +187,9 @@ RSpec.describe Revere do
     ticket_id = "zendesk_ticket_id"
     school_id = "45678"
 
-    stub_zendesk_ticket_with_school(ticket_id, school_id)
     stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "https://staff.teachable.com/schools/#{school_id}"}])
 
-    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/attachments")).to_not have_been_made
   end
@@ -205,7 +203,7 @@ RSpec.describe Revere do
       .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: ""}]}}.to_json)
     stub_trello_posted_comment(card_id)
 
-    Revere.update_trello_card(Revere::Trello::Card.new(card_id), ticket_id)
+    Revere.update_trello_card(Revere::Trello::Card.new(card_id), "")
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to_not have_been_made
   end
