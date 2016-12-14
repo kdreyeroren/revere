@@ -11,20 +11,22 @@ module Revere
     TOKEN = ENV.fetch("ZENDESK_TOKEN")
 
     def self.update_ticket(ticket_id, trello_list_name: "", github_links: [])
-      request(:put, "tickets/#{ticket_id}.json", {
-        ticket: {
-          custom_fields: [
-            {
-              id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-              value: trello_list_name.downcase.gsub(/\W/, "_")
-            },
-            {
-              id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
-              value: github_links.join("\n")
-            }
-          ]
-        }
-      })
+      ticket_obj = {
+          ticket: {
+            custom_fields: [
+              {
+                id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
+                value: trello_list_name.downcase.gsub(/\W/, "_")
+              },
+              {
+                id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
+                value: github_links.join("\n")
+              }
+            ]
+          }
+      }
+      puts ticket_obj.inspect
+      request(:put, "tickets/#{ticket_id}.json", ticket_obj)
     rescue ZendeskError => error
       if error.message.include? "closed prevents ticket update"
         # noop
@@ -51,7 +53,7 @@ module Revere
 
       Revere.logger.info "Response #{response.code}, body: #{response.body}"
 
-      if response.code == 200
+      if (200..299).cover? response.code
         response
       else
         raise ZendeskError, "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}, data:#{data.inspect}"

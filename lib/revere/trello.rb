@@ -112,7 +112,7 @@ module Revere
 
       Revere.logger.info "Response #{response.code}, body: #{response.body}"
 
-      if response.code == 200
+      if (200..299).cover? response.code
         JSON.parse(response.to_s)
       else
         raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"

@@ -1,12 +1,13 @@
-require 'yaml'
+require "yaml"
 
-require 'http'
-require 'addressable/uri'
-require 'verbose_hash_fetch'
-require 'raven'
+require "http"
+require "addressable/uri"
+require "verbose_hash_fetch"
+require "raven"
 
-require 'revere/trello'
-require 'revere/zendesk'
+require "revere/trello"
+require "revere/zendesk"
+require "revere/github"
 
 module Revere
 
