@@ -51,6 +51,15 @@ module Revere
     end
   end
 
+  def self.move_trello_card_to_staging(number)
+
+    # define card id
+    if (Github.get_pull_request_status(number) == "open") && (Github.get_if_pull_request_has_been_merged(number) == 202)
+      Github.move_to_different_list(card_id, ENV.fetch("ON_STAGING_LIST_ID"))
+    end
+
+  end
+
   def self.logger
     @logger ||= build_logger
   end

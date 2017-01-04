@@ -11,27 +11,33 @@ module Revere
     TOKEN = ENV.fetch("ZENDESK_TOKEN")
 
     def self.update_ticket(ticket_id, trello_list_name: "", github_links: [])
-      ticket_obj = {
-          ticket: {
-            custom_fields: [
-              {
-                id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-                value: trello_list_name.downcase.gsub(/\W/, "_")
-              },
-              {
-                id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
-                value: github_links.join("\n")
-              }
-            ]
-          }
-      }
-      puts ticket_obj.inspect
-      request(:put, "tickets/#{ticket_id}.json", ticket_obj)
-    rescue ZendeskError => error
-      if error.message.include? "closed prevents ticket update"
-        # noop
-      else
-        raise
+      retries = 0
+      begin
+        ticket_obj = {
+            ticket: {
+              custom_fields: [
+                {
+                  id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
+                  value: trello_list_name.downcase.gsub(/\W/, "_")
+                },
+                {
+                  id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
+                  value: github_links.join("\n")
+                }
+              ]
+            }
+        }
+        puts ticket_obj.inspect
+        request(:put, "tickets/#{ticket_id}.json", ticket_obj)
+      rescue ZendeskError => error
+        if error.message.include? "database collision" && ((retries += 1) < 5)
+          sleep 1
+          retry
+        elsif error.message.include? "closed prevents ticket update"
+          # noop
+        else
+          raise
+        end
       end
     end
 
