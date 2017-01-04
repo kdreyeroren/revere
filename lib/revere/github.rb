@@ -23,20 +23,12 @@ module Revere
       Trello.request(:put, "cards/#{card_id}/idList", value: list_id)
     end
 
-    def find_labels # find if deployed
-    end
-
     def self.github_checks(number) # I'm handling the header situation poorly, I know
       response = request_for_beta_testing(:get, "repos/UseFedora/revere/pulls/#{number}")
       statuses_url = response.fetch("statuses_url")
       request_for_beta_testing(:get, statuses_url).first.fetch("state")
       # fetch the statuses_url and make the GET request to that URL
     end
-
-    # # to move to staging:
-    # 1. check if it's open or closed
-    # 2. if it's closed, check if it's been merged
-    # 3. if it's been merged, then move to staging.
 
     def self.get_if_pull_request_has_been_merged(number)
       response = request(:get, "repos/UseFedora/revere/pulls/#{number}/merge")
@@ -50,19 +42,8 @@ module Revere
     end
 
     def self.get_pull_request_status(number)
-
       response = request(:get, "repos/UseFedora/revere/pulls/#{number}")
-
-      if response.body.include? "Not found"
-        puts "hello"
-      elsif response.code == 204
-        puts "goodbye"
-      else raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"
-      end
-
-      # will have to do some sort of response.include? in the method that calls this method
-        # if it's been merged: 204
-        # if it hasn't been merged: 404
+      response.fetch("state")
     end
 
     def self.get_pull_request_numbers_from_trello_card(card_id)
@@ -70,6 +51,7 @@ module Revere
       attachments
         .find_all { |i| i["url"].match %r"github.com/\S+/pull"}
         .map { |i| i["url"].split("/").last }
+        .first
     end
 
     def self.create_webhook(callback_url, options={})

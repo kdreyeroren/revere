@@ -51,9 +51,25 @@ module Revere
     end
   end
 
+  def self.move_trello_card_to_code_review(card_id)
+      card = Trello.get_card(card_id)
+      list_name = card.list_name
+      pr_number = Github.get_pull_request_numbers_from_trello_card(card_id)
+      pr_status = Github.get_pull_request_status(pr_number)
+      github_status = Github.github_checks(pr_number)
+
+      if (list_name.include? "Progress") && (pr_status == "open") && (github_status == "success")
+        Trello.move_card_to_code_review(card_id)
+      end
+  end
+
   def self.move_trello_card_to_staging(number)
 
-    # define card id
+    card_ids = Trello.get_card_ids
+
+
+
+
     if (Github.get_pull_request_status(number) == "open") && (Github.get_if_pull_request_has_been_merged(number) == 202)
       Github.move_to_different_list(card_id, ENV.fetch("ON_STAGING_LIST_ID"))
     end

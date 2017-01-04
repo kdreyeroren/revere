@@ -6,6 +6,7 @@ module Revere
     API_KEY  = ENV.fetch("TRELLO_API_KEY")
     TOKEN    = ENV.fetch("TRELLO_TOKEN")
     BASE_URI = ENV.fetch("TRELLO_BASE_URI")
+    CODE_REVIEW_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
 
     class Card
 
@@ -24,6 +25,12 @@ module Revere
       def github_links
         attachment_request_body
           .find_all { |i| i["url"].include? "github.com" }
+          .map { |i| i["url"] }
+      end
+
+      def github_prs
+        attachment_request_body
+          .find_all { |i| i["url"].match %r{github.com.+/pull} }
           .map { |i| i["url"] }
       end
 
@@ -99,6 +106,10 @@ module Revere
       find_all_cards.map do |card|
         card.fetch("id")
       end
+    end
+
+    def self.move_card_to_code_review(card_id)
+      request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
     end
 
     # template for trello requests
