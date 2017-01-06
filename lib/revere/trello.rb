@@ -2,11 +2,12 @@ module Revere
 
   module Trello
 
-    BOARD_ID = ENV.fetch("TRELLO_BOARD_ID")
-    API_KEY  = ENV.fetch("TRELLO_API_KEY")
-    TOKEN    = ENV.fetch("TRELLO_TOKEN")
-    BASE_URI = ENV.fetch("TRELLO_BASE_URI")
+    BOARD_ID       = ENV.fetch("TRELLO_BOARD_ID")
+    API_KEY        = ENV.fetch("TRELLO_API_KEY")
+    TOKEN          = ENV.fetch("TRELLO_TOKEN")
+    BASE_URI       = ENV.fetch("TRELLO_BASE_URI")
     CODE_REVIEW_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
+    ON_STAGING_ID  = ENV.fetch("ON_STAGING_LIST_ID")
 
     class Card
 
@@ -110,6 +111,10 @@ module Revere
 
     def self.move_card_to_code_review(card_id)
       request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
+    end
+
+    def self.move_card_to_staging(card_id)
+      request = request(:put, "cards/#{card_id}/idList", value: ON_STAGING_ID)
     end
 
     # template for trello requests

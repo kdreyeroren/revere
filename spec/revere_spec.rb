@@ -9,7 +9,25 @@ RSpec.describe Revere do
   TRELLO_BASE_URI = Revere::Trello::BASE_URI
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
   TRELLO_BOARD_ID = Revere::Trello::BOARD_ID
+  GITHUB_BASE_URI = Revere::Github::BASE_URI
 
+  # Zendesk
+  def stub_zendesk_ticket(ticket_id)
+    stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(status: 200)
+  end
+
+  def stub_zendesk_ticket_with_school(ticket_id, school_id)
+    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "#{school_id}"}]}}.to_json)
+  end
+
+  def zendesk_request(ticket_id, list_name, github_url)
+    a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
+      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
+  end
+
+  # Trello
   def stub_trello_attachment(card_id, body)
     stub_request(:get, %r"#{TRELLO_BASE_URI}cards/#{card_id}/attachments\?")
       .to_return(status: 200, body: body.to_json)
@@ -20,29 +38,14 @@ RSpec.describe Revere do
       .to_return(status: 200, body: body.to_json)
   end
 
-  def stub_zendesk_ticket(ticket_id)
-    stub_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .to_return(status: 200)
-  end
-
   def stub_trello_board(body)
     stub_request(:get, %r"#{TRELLO_BASE_URI}boards/#{TRELLO_BOARD_ID}/cards")
       .to_return(status: 200, body: body.to_json, headers: {})
   end
 
-  def stub_zendesk_ticket_with_school(ticket_id, school_id)
-    stub_request(:get, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .to_return(body: {ticket: {custom_fields: [{id: 45144647, value: "#{school_id}"}]}}.to_json)
-  end
-
   def stub_trello_posted_attachments(card_id)
     stub_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/attachments\?")
       .to_return(status: 200, body: "{}")
-  end
-
-  def zendesk_request(ticket_id, list_name, github_url)
-    a_request(:put, %r"#{ZENDESK_BASE_URI}tickets/#{ticket_id}.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "47614828", value: github_url}]}}.to_json)
   end
 
   def stub_trello_comment_card(card_id)
@@ -54,9 +57,26 @@ RSpec.describe Revere do
     stub_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
       .to_return(status: 200, body: "{}")
   end
+
   def trello_comment_request(card_id, comment_text)
     a_request(:post, %r"#{TRELLO_BASE_URI}cards/#{card_id}/actions/comments")
       .with()
+  end
+
+  # Github
+  def stub_github_pr_status(number)
+    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/UseFedora/revere/pulls/#{number}")
+      .to_return(status: 200, body: "{}")
+  end
+
+  def stub_github_status_check(number)
+    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/UseFedora/revere/pulls/#{number}")
+      .to_return(status: 200, body: "{}")
+  end
+
+  def stub_github_merge_status(number)
+    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/UseFedora/revere/pulls/#{number}")
+      .to_return(status: 200, body: "{}")
   end
 
 
@@ -206,6 +226,14 @@ RSpec.describe Revere do
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), "")
 
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to_not have_been_made
+  end
+
+  it "move a trello card correctly from in progress to code review" do
+    card_id = "trello_card_id"
+
+
+
+
   end
 
 end

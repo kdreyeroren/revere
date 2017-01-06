@@ -31,8 +31,8 @@ module Revere
     end
 
     def self.get_if_pull_request_has_been_merged(number)
-      response = request(:get, "repos/UseFedora/revere/pulls/#{number}/merge")
-      response.fetch("state")
+      response = request(:get, "repos/UseFedora/revere/pulls/#{number}")
+      response.fetch("merged")
     end
 
     def self.all_pull_request_statuses(card_id)
