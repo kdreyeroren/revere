@@ -35,6 +35,8 @@ module Revere
           retry
         elsif error.message.include? "closed prevents ticket update"
           # noop
+        elsif error.message.include? "policy metric"
+          # noop
         else
           raise
         end
