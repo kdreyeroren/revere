@@ -8,11 +8,8 @@ module Revere
     AUTH_TOKEN    = ENV.fetch("GITHUB_AUTH_TOKEN")
     GITHUB_REPO   = ENV.fetch("GITHUB_REPO")
 
-    UP_NEXT_LIST_ID     = ENV.fetch("UP_NEXT_LIST_ID")
-    IN_PROGRESS_LIST_ID = ENV.fetch("IN_PROGRESS_LIST_ID")
     CODE_REVIEW_LIST_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
     ON_STAGING_LIST_ID  = ENV.fetch("ON_STAGING_LIST_ID")
-    RELEASED_LIST_ID    = ENV.fetch("RELEASED_LIST_ID")
 
     def self.create_access_token(code)
       HTTP.post("https://github.com/login/oauth/access_token", form: {client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code})
