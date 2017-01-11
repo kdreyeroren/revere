@@ -32,7 +32,7 @@ post "/create_github_webhook" do
 end
 
 post "/github" do
-  request.body
+  Revere.move_all_trello_cards
 end
 
 get "/oauth" do
