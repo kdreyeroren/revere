@@ -7,8 +7,8 @@ module Revere
     ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(RACK_ENV)
 
     BASE_URI = ENV.fetch("ZENDESK_BASE_URI")
-    USER = ENV.fetch("ZENDESK_USER")
-    TOKEN = ENV.fetch("ZENDESK_TOKEN")
+    USER     = ENV.fetch("ZENDESK_USER")
+    TOKEN    = ENV.fetch("ZENDESK_TOKEN")
 
     def self.update_ticket(ticket_id, trello_list_name: "", github_links: [])
       retries = 0

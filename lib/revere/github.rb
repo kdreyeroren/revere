@@ -2,18 +2,17 @@ module Revere
 
   module Github
 
-    # TODO: figure out authentication. don't cry.
-
-    BASE_URI = ENV.fetch("GITHUB_BASE_URI")
-    CLIENT_ID = ENV.fetch("GITHUB_CLIENT_ID")
+    BASE_URI      = ENV.fetch("GITHUB_BASE_URI")
+    CLIENT_ID     = ENV.fetch("GITHUB_CLIENT_ID")
     CLIENT_SECRET = ENV.fetch("GITHUB_CLIENT_SECRET")
-    AUTH_TOKEN = ENV.fetch("GITHUB_AUTH_TOKEN")
+    AUTH_TOKEN    = ENV.fetch("GITHUB_AUTH_TOKEN")
+    GITHUB_REPO   = ENV.fetch("GITHUB_REPO")
 
-    UP_NEXT_LIST_ID = ENV.fetch("UP_NEXT_LIST_ID")
-    CODE_REVIEW_LIST_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
+    UP_NEXT_LIST_ID     = ENV.fetch("UP_NEXT_LIST_ID")
     IN_PROGRESS_LIST_ID = ENV.fetch("IN_PROGRESS_LIST_ID")
-    ON_STAGING_LIST_ID = ENV.fetch("ON_STAGING_LIST_ID")
-    RELEASED_LIST_ID = ENV.fetch("RELEASED_LIST_ID")
+    CODE_REVIEW_LIST_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
+    ON_STAGING_LIST_ID  = ENV.fetch("ON_STAGING_LIST_ID")
+    RELEASED_LIST_ID    = ENV.fetch("RELEASED_LIST_ID")
 
     def self.create_access_token(code)
       HTTP.post("https://github.com/login/oauth/access_token", form: {client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code})
@@ -45,7 +44,7 @@ module Revere
     # end
 
     def self.get_pull_request(number)
-      request(:get, "repos/UseFedora/revere/pulls/#{number}")
+      request(:get, "repos/#{GITHUB_REPO}/pulls/#{number}")
     end
 
     def self.get_pull_request_number_from_trello_card(card_id)
@@ -57,7 +56,7 @@ module Revere
     end
 
     def self.create_webhook(callback_url, options={})
-      response = request(:post, "repos/UseFedora/revere/hooks",
+      response = request(:post, "repos/#{GITHUB_REPO}/hooks",
       {body:
         {
           name: "web",

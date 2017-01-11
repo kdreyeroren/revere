@@ -6,10 +6,11 @@ RSpec.describe Revere do
     Sinatra::Application
   end
 
-  TRELLO_BASE_URI = Revere::Trello::BASE_URI
+  TRELLO_BASE_URI  = Revere::Trello::BASE_URI
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
-  TRELLO_BOARD_ID = Revere::Trello::BOARD_ID
-  GITHUB_BASE_URI = Revere::Github::BASE_URI
+  TRELLO_BOARD_ID  = Revere::Trello::BOARD_ID
+  GITHUB_BASE_URI  = Revere::Github::BASE_URI
+  GITHUB_REPO      = Revere::Github::GITHUB_REPO
 
   # Zendesk
   def stub_zendesk_ticket(ticket_id)
@@ -69,11 +70,11 @@ RSpec.describe Revere do
 
   # Github
   def stub_github_pulls
-    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/UseFedora/revere/pulls/$")
+    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/#{GITHUB_REPO}/pulls/$")
   end
 
   def stub_github_pr(number)
-    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/UseFedora/revere/pulls/#{number}")
+    stub_request(:get, %r"#{GITHUB_BASE_URI}repos/#{GITHUB_REPO}/pulls/#{number}")
   end
 
   def stub_github_status_to_cr(number)
