@@ -252,6 +252,35 @@ RSpec.describe Revere do
     expect(a_request(:post, %r"#{TRELLO_BASE_URI}cards/trello_card_id/actions/comments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, text: "School ID: 12345"})).to_not have_been_made
   end
 
+  it "creates a github webhook" do
+    allow(Revere::Github).to receive(:create_webhook).and_return("hello")
+
+    post "/create_github_webhook"
+
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to include "hello"
+    expect(Revere::Github).to have_received(:create_webhook).with("http://example.org/github")
+  end
+
+  it "creates a github webhook with a stub" do
+    stub_request(:post, "#{GITHUB_BASE_URI}repos/#{GITHUB_REPO}/hooks")
+      .with(body:
+        {
+          name: "web",
+          active: true,
+          config: {
+            url: "http://example.org/github",
+            content_type: JSON
+            }
+          }.to_json
+        )
+      .to_return(status: 200, body: "{}", headers: {})
+
+    post "/create_github_webhook"
+
+    expect(last_response.status).to eq 200
+  end
+
   it "moves a trello card correctly from in progress to code review" do
     card_id = "trello_card_id"
     code_review_id = "code_review_id"

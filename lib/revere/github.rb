@@ -57,6 +57,7 @@ module Revere
       {body:
         {
           name: "web",
+          active: true,
           config: {
             url: callback_url,
             content_type: JSON
