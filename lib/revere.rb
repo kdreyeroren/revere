@@ -56,6 +56,7 @@ module Revere
   def self.move_all_trello_cards
     Trello.get_card_ids.each do |card_id|
       move_trello_card_to_new_list(card_id)
+      sleep 0.5
     end
   end
 
