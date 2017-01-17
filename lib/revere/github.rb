@@ -34,12 +34,6 @@ module Revere
       get_pull_request(number).fetch("state")
     end
 
-    # def self.all_pull_request_statuses(card_id)
-    #   get_pull_request_numbers_from_trello_card(card_id).map { |number|
-    #     get_pull_request_status(number)
-    #   }
-    # end
-
     def self.get_pull_request(number)
       request(:get, "repos/#{GITHUB_REPO}/pulls/#{number}")
     end
@@ -57,6 +51,7 @@ module Revere
       {body:
         {
           name: "web",
+          active: true,
           config: {
             url: callback_url,
             content_type: JSON
@@ -64,6 +59,14 @@ module Revere
           }.to_json
         })
       response.to_s
+    end
+
+    def self.parse_response_body(response)
+      if !response.body.to_s.empty?
+        JSON.parse(response.body)
+      else
+        response.body
+      end
     end
 
     def self.request(verb, path, options={})
@@ -83,34 +86,10 @@ module Revere
 
       Revere.logger.info "Response #{response.code}, body: #{response.body}"
 
-      if (200..299).cover? response.code
-        JSON.parse(response.to_s)
-      else
-        raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"
-      end
+      parse_response_body(response)
 
     end
-
-    # def self.request(verb, path, options={})
-    #
-    #   uri = Addressable::URI.parse(File.join(BASE_URI, path))
-    #
-    #   Revere.logger.info "Performing request: #{verb.to_s.upcase} #{uri}"
-    #
-    #   response = HTTP.headers(authorization: "token #{AUTH_TOKEN}").request(verb, uri.to_s, options)
-    #
-    #   Revere.logger.info "Response #{response.code}, body: #{response.body}"
-    #
-    #   if (200..299).cover? response.code
-    #     JSON.parse(response.to_s)
-    #   else
-    #     raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"
-    #   end
-    #
-    # end
 
   end
 
 end
-
-# headers(authorization: "token #{AUTH_TOKEN}").
