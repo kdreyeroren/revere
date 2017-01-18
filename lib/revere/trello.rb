@@ -2,12 +2,13 @@ module Revere
 
   module Trello
 
-    BOARD_ID       = ENV.fetch("TRELLO_BOARD_ID")
-    API_KEY        = ENV.fetch("TRELLO_API_KEY")
-    TOKEN          = ENV.fetch("TRELLO_TOKEN")
-    BASE_URI       = ENV.fetch("TRELLO_BASE_URI")
-    CODE_REVIEW_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
-    ON_STAGING_ID  = ENV.fetch("ON_STAGING_LIST_ID")
+    BOARD_ID_DEV_Q  = ENV.fetch("TRELLO_BOARD_ID_DEV_Q")
+    BOARD_ID_SPRINT = ENV.fetch("TRELLO_BOARD_ID_SPRINT")
+    API_KEY         = ENV.fetch("TRELLO_API_KEY")
+    TOKEN           = ENV.fetch("TRELLO_TOKEN")
+    BASE_URI        = ENV.fetch("TRELLO_BASE_URI")
+    CODE_REVIEW_ID  = ENV.fetch("CODE_REVIEW_LIST_ID")
+    ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
 
     class Card
 
@@ -53,6 +54,10 @@ module Revere
         Trello.request(:post, "cards/#{id}/actions/comments", text: text)
       end
 
+      def board_name
+        board_request.fetch("name")
+      end
+
       def comments
         comment_request_body
           .fetch("actions")
@@ -72,6 +77,10 @@ module Revere
 
       def list_request
         @list_request ||= Trello.request(:get, "cards/#{id}/list")
+      end
+
+      def board_request(board_id)
+        @board_request ||= Trello.request(:get, "boards/#{board_id}")
       end
 
     end
@@ -94,13 +103,22 @@ module Revere
     end
 
     # triggers the webhook
-    def self.create_webhook(callback_url)
-      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID)
+    # def self.create_webhook(callback_url, id_model)
+    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: id_model)
+    #   response.to_s
+    # end
+
+    def self.create_webhook_dev_q(callback_url)
+      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_DEV_Q)
+      response.to_s    end
+
+    def self.create_webhook_sprint(callback_url)
+      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_SPRINT)
       response.to_s
     end
 
     def self.find_all_cards
-      request(:get, "boards/#{BOARD_ID}/cards")
+      request(:get, "boards/#{BOARD_ID_DEV_Q}/cards")
     end
 
     def self.get_card_ids
@@ -108,14 +126,14 @@ module Revere
         card.fetch("id")
       end
     end
-
-    def self.move_card_to_code_review(card_id)
-      request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
-    end
-
-    def self.move_card_to_staging(card_id)
-      request = request(:put, "cards/#{card_id}/idList", value: ON_STAGING_ID)
-    end
+    #
+    # def self.move_card_to_code_review(card_id)
+    #   request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
+    # end
+    #
+    # def self.move_card_to_staging(card_id)
+    #   request = request(:put, "cards/#{card_id}/idList", value: ON_STAGING_ID)
+    # end
 
     # template for trello requests
     def self.request(verb, path, options={})
