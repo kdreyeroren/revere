@@ -25,7 +25,8 @@ module Revere
       Zendesk.update_ticket(
         ticket_id,
         trello_list_name:  card.list_name,
-        github_links:      card.github_links
+        github_links:      card.github_links,
+        trello_board_name: card.board_name
       )
     end
 

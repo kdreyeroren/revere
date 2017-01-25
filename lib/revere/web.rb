@@ -15,7 +15,7 @@ post "/create_trello_webhook_dev_q" do
 end
 
 post "/create_trello_webhook_sprint" do
-  Revere::Trello.create_webhook_dev_q("#{request.base_url}/trello")
+  Revere::Trello.create_webhook_sprint("#{request.base_url}/trello")
 end
 
 head "/trello" do

@@ -79,8 +79,8 @@ module Revere
         @list_request ||= Trello.request(:get, "cards/#{id}/list")
       end
 
-      def board_request(board_id)
-        @board_request ||= Trello.request(:get, "boards/#{board_id}")
+      def board_request
+        @board_request ||= Trello.request(:get, "cards/#{id}/board")
       end
 
     end
@@ -110,7 +110,8 @@ module Revere
 
     def self.create_webhook_dev_q(callback_url)
       response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_DEV_Q)
-      response.to_s    end
+      response.to_s
+    end
 
     def self.create_webhook_sprint(callback_url)
       response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_SPRINT)
@@ -118,11 +119,14 @@ module Revere
     end
 
     def self.find_all_cards
-      request(:get, "boards/#{BOARD_ID_DEV_Q}/cards")
+      [
+        request(:get, "boards/#{BOARD_ID_DEV_Q}/cards"),
+        request(:get, "boards/#{BOARD_ID_SPRINT}/cards")
+      ]
     end
 
     def self.get_card_ids
-      find_all_cards.map do |card|
+      find_all_cards.flatten.compact.map do |card|
         card.fetch("id")
       end
     end
