@@ -18,11 +18,11 @@ module Revere
               custom_fields: [
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-                  value: trello_list_name.downcase.gsub(/\W/, "_")
+                  value: trello_list_name.downcase.gsub(/\W/, "_").squeeze("_")
                 },
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_board_name", "id").to_s,
-                  value: trello_board_name.downcase.gsub(/\W/, "_")
+                  value: trello_board_name.downcase.gsub(/\W/, "_").squeeze("_")
                 },
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,

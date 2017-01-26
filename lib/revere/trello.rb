@@ -2,13 +2,17 @@ module Revere
 
   module Trello
 
-    BOARD_ID_DEV_Q  = ENV.fetch("TRELLO_BOARD_ID_DEV_Q")
-    BOARD_ID_SPRINT = ENV.fetch("TRELLO_BOARD_ID_SPRINT")
     API_KEY         = ENV.fetch("TRELLO_API_KEY")
     TOKEN           = ENV.fetch("TRELLO_TOKEN")
     BASE_URI        = ENV.fetch("TRELLO_BASE_URI")
     CODE_REVIEW_ID  = ENV.fetch("CODE_REVIEW_LIST_ID")
     ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
+
+    BOARDS = {
+      "dev_q"  => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
+      "sprint" => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
+      "icebox" => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
+    }
 
     class Card
 
@@ -98,31 +102,39 @@ module Revere
 
     end
 
+    def self.fetch_board_id(board_name)
+      BOARDS.fetch(board_name.to_s)
+    end
+
     def self.get_card(card_id)
       Card.new(card_id)
     end
 
     # triggers the webhook
-    # def self.create_webhook(callback_url, id_model)
-    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: id_model)
+    def self.create_webhook(callback_url, board_name)
+      board_id = BOARDS.fetch(board_name)
+      response = request(:post, "webhooks", callbackURL: callback_url, idModel: board_id)
+      response.to_s
+    end
+
+
+    # def self.create_webhook_dev_q(callback_url)
+    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_DEV_Q)
+    #   response.to_s
+    # end
+    #
+    # def self.create_webhook_sprint(callback_url)
+    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_SPRINT)
+    #   response.to_s
+    # end
+    #
+    # def self.create_webhook_icebox(callback_url)
+    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_ICEBOX)
     #   response.to_s
     # end
 
-    def self.create_webhook_dev_q(callback_url)
-      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_DEV_Q)
-      response.to_s
-    end
-
-    def self.create_webhook_sprint(callback_url)
-      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_SPRINT)
-      response.to_s
-    end
-
     def self.find_all_cards
-      [
-        request(:get, "boards/#{BOARD_ID_DEV_Q}/cards"),
-        request(:get, "boards/#{BOARD_ID_SPRINT}/cards")
-      ]
+      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards") }
     end
 
     def self.get_card_ids

@@ -8,8 +8,7 @@ RSpec.describe Revere do
 
   TRELLO_BASE_URI  = Revere::Trello::BASE_URI
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
-  BOARD_ID_DEV_Q   = Revere::Trello::BOARD_ID_DEV_Q
-  BOARD_ID_SPRINT  = Revere::Trello::BOARD_ID_SPRINT
+
   GITHUB_BASE_URI  = Revere::Github::BASE_URI
   GITHUB_REPO      = Revere::Github::GITHUB_REPO
 

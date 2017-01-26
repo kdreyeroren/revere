@@ -8,7 +8,15 @@ The name is "Revere" like Paul Revere, because he was a messenger, and I'm from 
 
 ## Installation
 
-Do this:
-
+Regular installation:
     bundle install
     thin start
+
+Testing server:
+    gem install shotgun
+    shotgun
+    ngrok http 9393
+
+To test webhooks:
+    bundle install
+    thin --threaded start
