@@ -10,8 +10,8 @@ get "/" do
   erb :index
 end
 
-post "/create_trello_webhook" do
-  Revere::Trello.create_webhook("#{request.base_url}/trello")
+post "/create_trello_webhook/:board_name" do |board_name|
+  Revere::Trello.create_webhook("#{request.base_url}/trello", board_name)
 end
 
 head "/trello" do

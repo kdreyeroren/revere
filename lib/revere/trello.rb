@@ -2,12 +2,18 @@ module Revere
 
   module Trello
 
-    BOARD_ID       = ENV.fetch("TRELLO_BOARD_ID")
-    API_KEY        = ENV.fetch("TRELLO_API_KEY")
-    TOKEN          = ENV.fetch("TRELLO_TOKEN")
-    BASE_URI       = ENV.fetch("TRELLO_BASE_URI")
-    CODE_REVIEW_ID = ENV.fetch("CODE_REVIEW_LIST_ID")
-    ON_STAGING_ID  = ENV.fetch("ON_STAGING_LIST_ID")
+    API_KEY         = ENV.fetch("TRELLO_API_KEY")
+    TOKEN           = ENV.fetch("TRELLO_TOKEN")
+    BASE_URI        = ENV.fetch("TRELLO_BASE_URI")
+    CODE_REVIEW_ID  = ENV.fetch("CODE_REVIEW_LIST_ID")
+    ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
+
+    BOARDS = {
+      "dev_q"   => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
+      "sprint"  => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
+      "icebox"  => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
+      "ios_app" => ENV.fetch("TRELLO_BOARD_ID_IOS_APP")
+    }
 
     class Card
 
@@ -53,6 +59,10 @@ module Revere
         Trello.request(:post, "cards/#{id}/actions/comments", text: text)
       end
 
+      def board_name
+        board_request.fetch("name")
+      end
+
       def comments
         comment_request_body
           .fetch("actions")
@@ -74,6 +84,10 @@ module Revere
         @list_request ||= Trello.request(:get, "cards/#{id}/list")
       end
 
+      def board_request
+        @board_request ||= Trello.request(:get, "cards/#{id}/board")
+      end
+
     end
 
 
@@ -89,32 +103,29 @@ module Revere
 
     end
 
+    def self.fetch_board_id(board_name)
+      BOARDS.fetch(board_name.to_s)
+    end
+
     def self.get_card(card_id)
       Card.new(card_id)
     end
 
     # triggers the webhook
-    def self.create_webhook(callback_url)
-      response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID)
+    def self.create_webhook(callback_url, board_name)
+      board_id = BOARDS.fetch(board_name)
+      response = request(:post, "webhooks", callbackURL: callback_url, idModel: board_id)
       response.to_s
     end
 
     def self.find_all_cards
-      request(:get, "boards/#{BOARD_ID}/cards")
+      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards") }
     end
 
     def self.get_card_ids
-      find_all_cards.map do |card|
+      find_all_cards.flatten.compact.map do |card|
         card.fetch("id")
       end
-    end
-
-    def self.move_card_to_code_review(card_id)
-      request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
-    end
-
-    def self.move_card_to_staging(card_id)
-      request = request(:put, "cards/#{card_id}/idList", value: ON_STAGING_ID)
     end
 
     # template for trello requests
