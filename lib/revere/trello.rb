@@ -118,22 +118,6 @@ module Revere
       response.to_s
     end
 
-
-    # def self.create_webhook_dev_q(callback_url)
-    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_DEV_Q)
-    #   response.to_s
-    # end
-    #
-    # def self.create_webhook_sprint(callback_url)
-    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_SPRINT)
-    #   response.to_s
-    # end
-    #
-    # def self.create_webhook_icebox(callback_url)
-    #   response = request(:post, "webhooks", callbackURL: callback_url, idModel: BOARD_ID_ICEBOX)
-    #   response.to_s
-    # end
-
     def self.find_all_cards
       BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards") }
     end
@@ -143,14 +127,6 @@ module Revere
         card.fetch("id")
       end
     end
-    #
-    # def self.move_card_to_code_review(card_id)
-    #   request = request(:put, "cards/#{card_id}/idList", value: CODE_REVIEW_ID)
-    # end
-    #
-    # def self.move_card_to_staging(card_id)
-    #   request = request(:put, "cards/#{card_id}/idList", value: ON_STAGING_ID)
-    # end
 
     # template for trello requests
     def self.request(verb, path, options={})

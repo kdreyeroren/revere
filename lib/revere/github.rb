@@ -46,21 +46,6 @@ module Revere
         .first
     end
 
-    # def self.create_webhook(callback_url, options={})
-    #   response = request(:post, "repos/#{GITHUB_REPO}/hooks",
-    #   {body:
-    #     {
-    #       name: "web",
-    #       active: true,
-    #       config: {
-    #         url: callback_url,
-    #         content_type: JSON
-    #         }
-    #       }.to_json
-    #     })
-    #   response.to_s
-    # end
-
     def self.parse_response_body(response)
       if !response.body.to_s.empty?
         JSON.parse(response.body)
