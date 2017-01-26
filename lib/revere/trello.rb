@@ -9,9 +9,10 @@ module Revere
     ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
 
     BOARDS = {
-      "dev_q"  => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
-      "sprint" => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
-      "icebox" => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
+      "dev_q"   => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
+      "sprint"  => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
+      "icebox"  => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
+      "ios_app" => ENV.fetch("TRELLO_BOARD_ID_IOS_APP")
     }
 
     class Card

@@ -146,6 +146,7 @@ RSpec.describe Revere do
     stub_trello_cards_on_board(:dev_q, card_id, [{id: card_id}])
     stub_trello_cards_on_board(:sprint, card_id, [])
     stub_trello_cards_on_board(:icebox, card_id, [])
+    stub_trello_cards_on_board(:ios_app, card_id, [])
     stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
     stub_trello_list(card_id, {name: list_name})
     stub_trello_board_with_card_id(card_id, {name: board_name})
