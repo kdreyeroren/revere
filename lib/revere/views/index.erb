@@ -1,21 +1,5 @@
-<form action = "/create_trello_webhook_dev_q" method = "post">
-  <input type="submit" name="submit" value="Submit Trello Dev Q Webhook" />
-</form>
-
-<form action = "/create_trello_webhook_sprint" method = "post">
-  <input type="submit" name="submit" value="Submit Trello Sprint Webhook" />
-
-<form action = "/create_trello_webhook_icebox" method = "post">
-  <input type="submit" name="submit" value="Submit Trello Icebox Webhook" />
-
-<!-- <form action = "/create_github_webhook" method = "post">
-  <input type="submit" name="submit" value="Submit Github Webhook" />
-</form> -->
-
-<!--
-<a href="https://github.com/login/oauth/authorize?client_id=<%=ENV.fetch("GITHUB_CLIENT_ID")%>&scope=repo%20admin:repo_hook">Authorize on Github</a>
-
-
-<form action = "/github_root.json" method = "get">
-  <input type="submit" name="submit" value="Github Root" />
-</form> -->
+<% Revere::Trello::BOARDS.each do |board_name, _board_id| %>
+  <form action = "/create_trello_webhook/<%= board_name %>" method = "post">
+    <input type="submit" name="submit" value="Submit Trello <%= board_name %> Webhook" />
+  </form>
+<% end %>

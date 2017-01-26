@@ -54,34 +54,6 @@ module Revere
     end
   end
 
-  # def self.move_all_trello_cards
-  #   Trello.get_card_ids.each do |card_id|
-  #     move_trello_card_to_new_list(card_id)
-  #     sleep 0.5
-  #   end
-  # end
-
-  # def self.move_trello_card_to_new_list(card_id)
-  #     card = Trello.get_card(card_id)
-  #     list_name = card.list_name
-  #     pr_number = Github.get_pull_request_number_from_trello_card(card_id)
-  #
-  #     return if !pr_number || pr_number == nil
-  #
-  #     pr_status = Github.get_pull_request_status(pr_number)
-  #     github_status = Github.github_checks(pr_number)
-  #     merged_status = Github.get_if_pull_request_has_been_merged(pr_number)
-  #
-  #     if (list_name.include? "Progress") && (pr_status == "open") && (pr_status != "closed") && (github_status == "success")
-  #       Trello.move_card_to_code_review(card_id)
-  #     elsif (list_name.include? "Review") && (pr_status == "closed") && (pr_status != "open") && (merged_status == true) && (github_status == "success")
-  #       Trello.move_card_to_staging(card_id)
-  #     else
-  #       # noop
-  #     end
-  # end
-
-
   def self.logger
     @logger ||= build_logger
   end
