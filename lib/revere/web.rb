@@ -31,10 +31,6 @@ post "/create_github_webhook" do
   Revere::Github.create_webhook("#{request.base_url}/github")
 end
 
-post "/github" do
-  Revere.move_all_trello_cards
-end
-
 get "/oauth" do
   Revere::Github.create_access_token(params[:code]).to_s
 end

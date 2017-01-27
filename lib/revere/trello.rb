@@ -119,7 +119,7 @@ module Revere
     end
 
     def self.find_all_cards
-      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards") }
+      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards/open") }
     end
 
     def self.get_card_ids
