@@ -128,6 +128,15 @@ module Revere
       end
     end
 
+    def self.get_all_lists
+      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/lists?fields=name") }
+        .flatten
+    end
+
+    def self.get_list_names
+      get_all_lists.map { |hash| hash.fetch("name")}
+    end
+
     # template for trello requests
     def self.request(verb, path, options={})
       uri = Addressable::URI.parse(File.join(BASE_URI, path))

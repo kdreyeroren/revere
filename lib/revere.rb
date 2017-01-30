@@ -46,6 +46,14 @@ module Revere
     end
   end
 
+  def self.update_trello_list_names_in_zendesk
+    names = Trello.get_list_names.uniq { |name| name.downcase }
+
+    custom_field_options = names.map { |name| { name: name, value: name.downcase.gsub(/\W/, "_").squeeze("_") } }
+
+    Zendesk.request(:put, "ticket_fields/46456408.json", { "ticket_field": { "custom_field_options": custom_field_options}})
+  end
+
   def self.update_trello_card(card, school_id)
     return if !school_id || school_id == ""
     url = "https://staff.teachable.com/schools/#{school_id}"
