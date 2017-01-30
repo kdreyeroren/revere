@@ -15,6 +15,10 @@ module Revere
       "ios_app" => ENV.fetch("TRELLO_BOARD_ID_IOS_APP")
     }
 
+    def self.boards
+      BOARDS
+    end
+
     class Card
 
       attr_reader :id
@@ -104,7 +108,7 @@ module Revere
     end
 
     def self.fetch_board_id(board_name)
-      BOARDS.fetch(board_name.to_s)
+      boards.fetch(board_name.to_s)
     end
 
     def self.get_card(card_id)
@@ -113,13 +117,13 @@ module Revere
 
     # triggers the webhook
     def self.create_webhook(callback_url, board_name)
-      board_id = BOARDS.fetch(board_name)
+      board_id = boards.fetch(board_name)
       response = request(:post, "webhooks", callbackURL: callback_url, idModel: board_id)
       response.to_s
     end
 
     def self.find_all_cards
-      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards/open") }
+      boards.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards/open") }
     end
 
     def self.get_card_ids
@@ -129,7 +133,7 @@ module Revere
     end
 
     def self.get_all_lists
-      BOARDS.each_value.map { |board_id| request(:get, "boards/#{board_id}/lists?fields=name") }
+      boards.each_value.map { |board_id| request(:get, "boards/#{board_id}/lists?fields=name") }
         .flatten
     end
 

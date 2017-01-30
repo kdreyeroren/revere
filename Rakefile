@@ -3,7 +3,8 @@ task :sync => :environment do
   Revere.sync_multiple_tickets
 end
 
-task :sync_list_names => :environment do
+desc "updates trello list names in zendesk"
+task :update_list_names => :environment do
   Revere.update_trello_list_names_in_zendesk
 end
 
