@@ -10,7 +10,7 @@ require "revere/zendesk"
 require "revere/github"
 
 module Revere
-  
+
   def self.configure
     Raven.configure do |config|
       config.dsn = ENV["SENTRY_DSN"] if ENV["SENTRY_DSN"]
@@ -46,7 +46,7 @@ module Revere
     end
   end
 
-  def self.update_trello_list_names_in_zendesk(names)
+  def self.update_trello_list_names_in_zendesk
     names = Trello.get_list_names.uniq { |name| name.downcase }
     Zendesk.update_ticket_fields(names)
   end
