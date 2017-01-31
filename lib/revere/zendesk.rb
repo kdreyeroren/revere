@@ -17,15 +17,15 @@ module Revere
             ticket: {
               custom_fields: [
                 {
-                  id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-                  value: trello_list_name.downcase.gsub(/\W/, "_").squeeze("_")
+                  id: field_id("trello_list_name"),
+                  value: format_tags(trello_list_name)
                 },
                 {
-                  id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_board_name", "id").to_s,
-                  value: trello_board_name.downcase.gsub(/\W/, "_").squeeze("_")
+                  id: field_id("trello_board_name"),
+                  value: format_tags(trello_board_name)
                 },
                 {
-                  id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
+                  id: field_id("github_links"),
                   value: github_links.join("\n")
                 }
               ]
@@ -47,10 +47,25 @@ module Revere
       end
     end
 
+    def self.update_ticket_fields(list_names)
+      custom_field_options = list_names.map { |name| { name: name, value: Zendesk.format_tags(name) } }
+
+      request(:put, "ticket_fields/#{field_id("trello_list_name")}.json", { "ticket_field": { "custom_field_options": custom_field_options}})
+    end
+
+    # Formats the value in Zendesk so it can be used as a tag for the custom ticket field
+    def self.format_tags(list_name)
+      list_name.downcase.gsub(/\W/, "_").squeeze("_")
+    end
+
     def self.school_id(ticket_id)
       body = request(:get, "tickets/#{ticket_id}.json")
       parsed_body = JSON.parse(body)
-      parsed_body.dig("ticket", "custom_fields").find { |i| i["id"] == ZENDESK_CONFIG.dig("custom_fields", "ticket", "school_id", "id") }.fetch("value")
+      parsed_body.dig("ticket", "custom_fields").find { |i| i["id"] == field_id("school_id").to_i }.fetch("value")
+    end
+
+    def self.field_id(field_name)
+      ZENDESK_CONFIG.dig("custom_fields", "ticket", field_name, "id").to_s
     end
 
     # template for zendesk requests
