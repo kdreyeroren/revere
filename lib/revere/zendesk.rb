@@ -18,11 +18,11 @@ module Revere
               custom_fields: [
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id").to_s,
-                  value: trello_list_name.downcase.gsub(/\W/, "_").squeeze("_")
+                  value: format_tags(trello_list_name)
                 },
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_board_name", "id").to_s,
-                  value: trello_board_name.downcase.gsub(/\W/, "_").squeeze("_")
+                  value: format_tags(trello_board_name)
                 },
                 {
                   id: ZENDESK_CONFIG.dig("custom_fields", "ticket", "github_links", "id").to_s,
@@ -45,6 +45,16 @@ module Revere
           raise
         end
       end
+    end
+
+    def self.update_ticket_fields(list_names)
+      custom_field_options = list_names.map { |name| { name: name, value: Zendesk.format_tags(name) } }
+
+      request(:put, "ticket_fields/#{ZENDESK_CONFIG.dig("custom_fields", "ticket", "trello_list_name", "id")}.json", { "ticket_field": { "custom_field_options": custom_field_options}})
+    end
+
+    def self.format_tags(word)
+      word.downcase.gsub(/\W/, "_").squeeze("_")
     end
 
     def self.school_id(ticket_id)

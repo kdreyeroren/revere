@@ -11,6 +11,8 @@ require "revere/github"
 
 module Revere
 
+  ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(RACK_ENV)
+
   def self.configure
     Raven.configure do |config|
       config.dsn = ENV["SENTRY_DSN"] if ENV["SENTRY_DSN"]
@@ -46,12 +48,9 @@ module Revere
     end
   end
 
-  def self.update_trello_list_names_in_zendesk
+  def self.update_trello_list_names_in_zendesk(names)
     names = Trello.get_list_names.uniq { |name| name.downcase }
-
-    custom_field_options = names.map { |name| { name: name, value: name.downcase.gsub(/\W/, "_").squeeze("_") } }
-
-    Zendesk.request(:put, "ticket_fields/46456408.json", { "ticket_field": { "custom_field_options": custom_field_options}})
+    Zendesk.update_ticket_fields(names)
   end
 
   def self.update_trello_card(card, school_id)
