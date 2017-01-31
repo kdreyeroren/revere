@@ -186,7 +186,6 @@ RSpec.describe Revere do
     list_name2 = "list name 2"
     value1 = "list_name_1"
     value2 = "list_name_2"
-    names = ["list name 1", "list name 2"]
 
     allow(Revere::Trello).to receive(:boards).and_return({"dev_q" => "12345", "sprint" => "67890"})
 
@@ -194,7 +193,7 @@ RSpec.describe Revere do
     stub_trello_list_by_board_with_name_field(:sprint, [{name: list_name2}])
     stub_trello_list_in_zendesk([{name: list_name1, value: value1},{name: list_name2, value: value2}])
 
-    Revere.update_trello_list_names_in_zendesk(names)
+    Revere.update_trello_list_names_in_zendesk
 
     expect(a_request(:put, %r"#{Revere::Zendesk::BASE_URI}ticket_fields/#{Revere::Zendesk.field_id("trello_list_name")}.json")
       .with(body: {ticket_field: {custom_field_options: [{name: list_name1, value: value1},{name: list_name2, value: value2}]}}.to_json))
