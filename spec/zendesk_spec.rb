@@ -1,7 +1,6 @@
 RSpec.describe Revere do
 
   include Rack::Test::Methods
-  require "pry"
 
   def app
     Sinatra::Application
@@ -22,13 +21,14 @@ RSpec.describe Revere do
   end
 
   def stub_trello_list_in_zendesk(custom_field_options)
-    stub_zendesk(:put, "ticket_fields/46456408.json", { "ticket_field": { "custom_field_options": custom_field_options}})
+    stub_zendesk(:put, "ticket_fields/#{Revere::Zendesk.field_id("trello_list_name")}.json", { "ticket_field": { "custom_field_options": custom_field_options}})
   end
 
   def zendesk_request(ticket_id, list_name, board_name, github_url)
     a_request(:put, %r"#{Revere::Zendesk::BASE_URI}tickets/#{ticket_id}.json")
-      .with(body: {ticket: {custom_fields: [{id: "46456408", value: list_name}, {id: "52244747", value: board_name}, {id: "47614828", value: github_url}]}}.to_json)
+      .with(body: {ticket: {custom_fields: [{id: Revere::Zendesk.field_id("trello_list_name"), value: list_name}, {id: Revere::Zendesk.field_id("trello_board_name"), value: board_name}, {id: Revere::Zendesk.field_id("github_links"), value: github_url}]}}.to_json)
   end
+
 
   # Trello
   def stub_trello(verb, path, body = {}, status = 200)
@@ -180,7 +180,7 @@ RSpec.describe Revere do
     # no error
   end
 
-  fit "updates the trello list names in zendesk" do
+  it "updates the trello list names in zendesk" do
     #card_id = "trello_card_id"
     list_name1 = "list name 1"
     list_name2 = "list name 2"
@@ -196,7 +196,7 @@ RSpec.describe Revere do
 
     Revere.update_trello_list_names_in_zendesk(names)
 
-    expect(a_request(:put, %r"#{Revere::Zendesk::BASE_URI}ticket_fields/46456408.json")
+    expect(a_request(:put, %r"#{Revere::Zendesk::BASE_URI}ticket_fields/#{Revere::Zendesk.field_id("trello_list_name")}.json")
       .with(body: {ticket_field: {custom_field_options: [{name: list_name1, value: value1},{name: list_name2, value: value2}]}}.to_json))
       .to have_been_made
   end

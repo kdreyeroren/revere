@@ -4,6 +4,7 @@ require "webmock/rspec"
 require "rack/test"
 require_relative "../environment"
 require "revere/web"
+require "pry"
 
 WebMock.disable_net_connect!
 WebMock.enable!

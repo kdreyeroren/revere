@@ -10,9 +10,7 @@ require "revere/zendesk"
 require "revere/github"
 
 module Revere
-
-  ZENDESK_CONFIG = YAML.load_file("config/zendesk.yml").fetch(RACK_ENV)
-
+  
   def self.configure
     Raven.configure do |config|
       config.dsn = ENV["SENTRY_DSN"] if ENV["SENTRY_DSN"]
