@@ -9,10 +9,11 @@ module Revere
     ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
 
     BOARDS = {
-      "dev_q"   => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
-      "sprint"  => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
-      "icebox"  => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
-      "ios_app" => ENV.fetch("TRELLO_BOARD_ID_IOS_APP")
+      "dev_q"         => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
+      "sprint"        => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
+      "icebox"        => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
+      "ios_app"       => ENV.fetch("TRELLO_BOARD_ID_IOS_APP"),
+      "customer_care" => ENV.fetch("TRELLO_BOARD_ID_CUSTOMER_CARE")
     }
 
     def self.boards
@@ -155,7 +156,11 @@ module Revere
       if (200..299).cover? response.code
         JSON.parse(response.to_s)
       else
-        raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"
+        if response.to_s.include?("expired token")
+          raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}. To fix this, sign into the Teachabot Trello account and generate a new API token. Go to this page and click token: https://trello.com/app-key. The token expires about once a month."
+        else
+          raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"
+        end
       end
 
     end
