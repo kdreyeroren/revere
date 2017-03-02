@@ -52,7 +52,7 @@ module Revere
   end
 
   def self.update_trello_card(card, school_id)
-    return if !school_id || school_id == ""
+    return if school_id.to_s !~ /\A\d+\z/
     url = "https://staff.teachable.com/schools/#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
       card.create_school_attachment(url, "School ID: #{school_id}")
