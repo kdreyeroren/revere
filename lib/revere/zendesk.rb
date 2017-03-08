@@ -31,7 +31,6 @@ module Revere
               ]
             }
         }
-        puts ticket_obj.inspect
         request(:put, "tickets/#{ticket_id}.json", ticket_obj)
       rescue ZendeskError => error
         if error.message.include?("database collision") && ((retries += 1) < 5)

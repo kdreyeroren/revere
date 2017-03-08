@@ -156,7 +156,7 @@ module Revere
       if (200..299).cover? response.code
         JSON.parse(response.to_s)
       else
-        if response.to_s.include?("expired token")
+        if response.to_s.include?("invalid token")
           raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}. To fix this, sign into the Teachabot Trello account and generate a new API token. Go to this page and click token: https://trello.com/app-key. The token expires about once a month."
         else
           raise "HTTP code is #{response.code}, response is #{response.to_s.inspect}, verb:#{verb}, uri:#{uri}"

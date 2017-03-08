@@ -4,6 +4,7 @@ require "http"
 require "addressable/uri"
 require "verbose_hash_fetch"
 require "raven"
+require "robust-redis-lock"
 
 require "revere/trello"
 require "revere/zendesk"
@@ -16,26 +17,36 @@ module Revere
       config.dsn = ENV["SENTRY_DSN"] if ENV["SENTRY_DSN"]
       config.excluded_exceptions = []
     end
+    if ENV["REDISCLOUD_URL"]
+      uri = URI.parse(ENV["REDISCLOUD_URL"])
+      Redis::Lock.redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+    else
+      Redis::Lock.redis = Redis.new
+    end
   end
 
   def self.sync_single_ticket(card_id)
-    card = Trello.get_card(card_id)
+    lock = Redis::Lock.new("card_#{card_id}")
+    lock.synchronize do
 
-    card.zendesk_ticket_ids.each do |ticket_id|
-      Zendesk.update_ticket(
-        ticket_id,
-        trello_list_name:  card.list_name,
-        github_links:      card.github_links,
-        trello_board_name: card.board_name
-      )
-    end
+      card = Trello.get_card(card_id)
 
-    school_ids = card.zendesk_ticket_ids.uniq.map { |ticket_id|
-      Zendesk.school_id(ticket_id)
-    }.compact.reject(&:empty?).uniq
+      card.zendesk_ticket_ids.each do |ticket_id|
+        Zendesk.update_ticket(
+          ticket_id,
+          trello_list_name:  card.list_name,
+          github_links:      card.github_links,
+          trello_board_name: card.board_name
+        )
+      end
 
-    school_ids.each do |school_id|
-      update_trello_card(card, school_id)
+      school_ids = card.zendesk_ticket_ids.uniq.map { |ticket_id|
+        Zendesk.school_id(ticket_id)
+      }.compact.reject(&:empty?).uniq
+
+      school_ids.each do |school_id|
+        update_trello_card(card, school_id)
+      end
     end
   end
 
@@ -52,7 +63,7 @@ module Revere
   end
 
   def self.update_trello_card(card, school_id)
-    return if !school_id || school_id == ""
+    return if school_id.to_s !~ /\A\d+\z/
     url = "https://staff.teachable.com/schools/#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
       card.create_school_attachment(url, "School ID: #{school_id}")
@@ -71,6 +82,5 @@ module Revere
       Logger.new($stdout)
     end
   end
-
 
 end
