@@ -11,6 +11,7 @@ gem "rake"
 gem "dotenv", groups: [:development, :test]
 gem "sentry-raven"
 gem "awesome_print"
+gem "robust-redis-lock"
 
 group :test do
   gem "rack-test"
