@@ -25,7 +25,7 @@ module Revere
     end
   end
 
-  def self.sync_single_ticket(card_id, tries = 0)
+  def self.sync_single_ticket(card_id, tries = 5)
     lock = Redis::Lock.new("card_#{card_id}")
     lock.synchronize do
 
@@ -49,9 +49,9 @@ module Revere
       end
     end
   rescue Redis::Lock::LostLock
-    tries += 1
-    if tries < 5
-      sleep(2 ** tries)
+    tries -= 1
+    if tries > 0
+      sleep 0.5
       retry
     else
       raise
@@ -61,7 +61,7 @@ module Revere
   def self.sync_multiple_tickets
     Trello.get_card_ids.each do |card_id|
       sync_single_ticket(card_id)
-      sleep 0.5
+      sleep 1
     end
   end
 
