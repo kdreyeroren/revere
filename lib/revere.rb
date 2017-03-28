@@ -61,7 +61,7 @@ module Revere
   def self.sync_multiple_tickets
     Trello.get_card_ids.each do |card_id|
       sync_single_ticket(card_id)
-      sleep 1
+      sleep 0.5
     end
   end
 
