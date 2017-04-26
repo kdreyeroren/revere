@@ -12,7 +12,7 @@ RSpec.describe Revere do
   BOARD_ID_SPRINT  = Revere::Trello::BOARD_ID_SPRINT
   GITHUB_BASE_URI  = Revere::Github::BASE_URI
   GITHUB_REPO      = Revere::Github::GITHUB_REPO
-  STAFF_BASE_URL   = Revere::TEACHABLE_STAFF_BASE_URL
+  STAFF_BASE_URL   = Revere::TEACHABLE_STAFF_URL
 
   # Zendesk
   def stub_zendesk_ticket(ticket_id)

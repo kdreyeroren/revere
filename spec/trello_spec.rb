@@ -7,7 +7,7 @@ RSpec.describe Revere do
   end
 
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
-  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_BASE_URL")
+  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_URL")
 
   def stub_trello(verb, path, body = {}, status = 200)
     stub_request(verb, %r"#{Revere::Trello::BASE_URI}#{path}")

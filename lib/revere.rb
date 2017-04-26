@@ -12,7 +12,7 @@ require "revere/github"
 
 module Revere
 
-  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_BASE_URL")
+  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_URL")
 
   def self.configure
     Raven.configure do |config|

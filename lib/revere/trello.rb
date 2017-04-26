@@ -48,7 +48,7 @@ module Revere
 
       def school_id_urls
         attachment_request_body
-        .find_all { |i| i["url"].include? "teachablestaff.com" }
+        .find_all { |i| i["url"].include? ("teachablestaff.com" || "staff.teachable.com") }
         .map { |i| i["url"] }
       end
 
