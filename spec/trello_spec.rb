@@ -7,6 +7,7 @@ RSpec.describe Revere do
   end
 
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
+  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_BASE_URL")
 
   def stub_trello(verb, path, body = {}, status = 200)
     stub_request(verb, %r"#{Revere::Trello::BASE_URI}#{path}")
@@ -54,7 +55,7 @@ RSpec.describe Revere do
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 
-    expect(a_request(:post, %r"#{Revere::Trello::BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, token: Revere::Trello::TOKEN, url: "https://staff.teachable.com/schools/12345", name: "School ID: #{school_id}"})).to have_been_made
+    expect(a_request(:post, %r"#{Revere::Trello::BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, name: "School ID: #{school_id}", token: Revere::Trello::TOKEN, url: "#{STAFF_BASE_URL}12345"})).to have_been_made
   end
 
   it "doesn't put the school id in the card if it's already there" do
@@ -62,7 +63,7 @@ RSpec.describe Revere do
     ticket_id = "zendesk_ticket_id"
     school_id = "45678"
 
-    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "https://staff.teachable.com/schools/#{school_id}"}])
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "#{STAFF_BASE_URL}#{school_id}"}])
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 
