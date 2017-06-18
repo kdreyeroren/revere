@@ -8,7 +8,9 @@ The name is "Revere" like Paul Revere, because he was a messenger of information
 
 ### Background
 
-We had a system in which, when a customer had a problem that requires a bug fix, the customer care associate would take the customer's Zendesk ticket and attach it to a Trello card on a board dedicated to "questions only the engineers can solve." That board had several lists: New, In Progress, Fixed, Deployed, etc. This forced both engineers and customer care associates to go back and forth all the time: the CCAs constantly checked which lane the card was in, and if a problem had been fixed they had no way of knowing automatically. Additionally, engineers were constantly having to go back to Zendesk and find the account ("school") associated with the ticket so they could troubleshoot. This wasted a lot of time, so I built Revere.
+We had a system in which, when a customer had a problem that requires a bug fix, the customer care associate would take the customer's Zendesk ticket and attach it to a Trello card on a board dedicated to "questions only the engineers can solve." That board had several lists: New, In Progress, Fixed, Deployed, etc. This forced both engineers and customer care associates to go back and forth all the time: the CC team constantly checked which lane the card was in, and if a problem had been fixed they had no way of knowing automatically. Additionally, engineers were constantly having to go back to Zendesk and find the account associated with the ticket so they could troubleshoot. This wasted a lot of time, so I built Revere.
+
+You'll notice that there are a lot of references to "school" in here - our product was an education platform, so our accounts were all schools with IDs and URLs that pointed to the school in our backend system. You can of course use it with whatever type of account details you like; I took out identifying information but you should be able to change "school" to "account" or "user" or anything else.
 
 ## Installation
 
@@ -31,6 +33,11 @@ bundle install
 thin --threaded start
 ngrok http 3000
 ```
+
+- To run tests:
+```
+rspec
+````
 
 ## How we used it
 
