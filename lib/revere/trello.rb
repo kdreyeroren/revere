@@ -28,6 +28,14 @@ module Revere
         @id = id
       end
 
+      # MODIFY
+      # This is a skeleton method you can modify to find links or any other attachments on a trello card
+      def skeleton_filter_method
+        attachment_request_body
+          .find_all { |i| i[] } # MODIFY
+          .map { |i| i[] }
+      end
+
       def zendesk_ticket_ids
         attachment_request_body
           .find_all { |i| i["url"].include? "zendesk.com" }
@@ -46,9 +54,10 @@ module Revere
           .map { |i| i["url"] }
       end
 
+### pull out
       def school_id_urls
         attachment_request_body
-        .find_all { |i| i["url"].include?("staff.teachable.com") || i["url"].include?("teachablestaff.com") }
+        .find_all { |i| i["url"].include?("our_url.com") }
         .map { |i| i["url"] }
       end
 

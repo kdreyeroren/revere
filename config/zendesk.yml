@@ -1,29 +1,9 @@
 live: &live
   custom_fields:
     ticket:
-      narrowing_it_down:
-        id: 36352208
-      source:
-        id: 37267368
-        type: select
-        options:
-           - help_tab
-           - chat
       school_id:
         id: 39095808
         type: text
-      link_to_area_affected:
-        id: 39178208
-        type: text
-      school_plan_id:
-        id: 36460047
-        type: select
-        options:
-          - planid-1
-          - planid-2
-          - planid-5
-      reason_for_refund:
-        id: 46945287
       trello_list_name:
         id: 46264128
       github_links:
@@ -33,26 +13,8 @@ live: &live
 sandbox: &sandbox
   custom_fields:
     ticket:
-      narrowing_it_down:
-        id: 45152007
-      source:
-        id: 45071988
-        type: select
-        options:
-           - help_tab
-           - chat
-      link_to_area_affected:
-        id: 45073568
       school_id:
         id: 45144647
-      school_plan_id:
-        id: 45072288
-        type: select
-        options:
-          - planid-1
-          - planid
-      reason_for_refund:
-        id: 46945267
       trello_list_name:
         id: 46456408
       github_links:

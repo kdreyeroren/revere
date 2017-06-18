@@ -10,6 +10,7 @@ module Revere
     USER     = ENV.fetch("ZENDESK_USER")
     TOKEN    = ENV.fetch("ZENDESK_TOKEN")
 
+### pull out
     def self.update_ticket(ticket_id, trello_list_name: "", github_links: [], trello_board_name: "")
       retries = 0
       begin
@@ -46,17 +47,14 @@ module Revere
       end
     end
 
+### pull out
     def self.update_ticket_fields(list_names)
       custom_field_options = list_names.map { |name| { name: name, value: Zendesk.format_tags(name) } }
 
       request(:put, "ticket_fields/#{field_id("trello_list_name")}.json", { "ticket_field": { "custom_field_options": custom_field_options}})
     end
 
-    # Formats the value in Zendesk so it can be used as a tag for the custom ticket field
-    def self.format_tags(list_name)
-      list_name.downcase.gsub(/\W/, "_").squeeze("_")
-    end
-
+### pull out
     def self.school_id(ticket_id)
       body = request(:get, "tickets/#{ticket_id}.json")
       parsed_body = JSON.parse(body)
@@ -65,6 +63,11 @@ module Revere
 
     def self.field_id(field_name)
       ZENDESK_CONFIG.dig("custom_fields", "ticket", field_name, "id").to_s
+    end
+
+    # Formats the value in Zendesk so it can be used as a tag for the custom ticket field
+    def self.format_tags(list_name)
+      list_name.downcase.gsub(/\W/, "_").squeeze("_")
     end
 
     # template for zendesk requests

@@ -8,7 +8,6 @@ require "robust-redis-lock"
 
 require "revere/trello"
 require "revere/zendesk"
-require "revere/github"
 
 module Revere
 
@@ -28,9 +27,7 @@ module Revere
   end
 
   def self.sync_single_ticket(card_id, tries = 5)
-    lock = Redis::Lock.new("card_#{card_id}")
-    lock.synchronize do
-
+    lock("card_#{card_id}", tries) do
       card = Trello.get_card(card_id)
 
       card.zendesk_ticket_ids.each do |ticket_id|
@@ -46,9 +43,19 @@ module Revere
         Zendesk.school_id(ticket_id)
       }.compact.reject(&:empty?).uniq
 
+
       school_ids.each do |school_id|
         update_trello_card(card, school_id)
       end
+    end
+  end
+
+
+  # TODO
+  def self.lock(lock_id, tries, &block)
+    lock = Redis::Lock.new(lock_id)
+    lock.synchronize do
+      block.call # this should be the actual method that does the main action
     end
   rescue Redis::Lock::LostLock
     tries -= 1
@@ -73,6 +80,7 @@ module Revere
   end
 
   def self.update_trello_card(card, school_id)
+    ### pull out
     return if school_id.to_s !~ /\A\d+\z/
     url = "#{STAFF_BASE_URL}#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
