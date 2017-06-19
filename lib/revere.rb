@@ -84,7 +84,7 @@ module Revere
     return if school_id.to_s !~ /\A\d+\z/
     url = "#{STAFF_BASE_URL}#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
-      card.create_school_attachment(url, "School ID: #{school_id}")
+      card.create_school_attachment(url, "School ID: #{school_id}") #TODO
     end
   end
 

@@ -5,15 +5,11 @@ module Revere
     API_KEY         = ENV.fetch("TRELLO_API_KEY")
     TOKEN           = ENV.fetch("TRELLO_TOKEN")
     BASE_URI        = ENV.fetch("TRELLO_BASE_URI")
-    CODE_REVIEW_ID  = ENV.fetch("CODE_REVIEW_LIST_ID")
-    ON_STAGING_ID   = ENV.fetch("ON_STAGING_LIST_ID")
 
+    # MODIFY
+    # Add any board you're using to the env file, as well as the env.test file, then link them up here
     BOARDS = {
-      "dev_q"         => ENV.fetch("TRELLO_BOARD_ID_DEV_Q"),
-      "sprint"        => ENV.fetch("TRELLO_BOARD_ID_SPRINT"),
-      "icebox"        => ENV.fetch("TRELLO_BOARD_ID_ICEBOX"),
-      "ios_app"       => ENV.fetch("TRELLO_BOARD_ID_IOS_APP"),
-      "customer_care" => ENV.fetch("TRELLO_BOARD_ID_CUSTOMER_CARE")
+      "board" => ENV.fetch("TRELLO_BOARD_ID")
     }
 
     def self.boards
@@ -29,10 +25,11 @@ module Revere
       end
 
       # MODIFY
-      # This is a skeleton method you can modify to find links or any other attachments on a trello card
+      # This is a skeleton method you can modify to find links or any other attachments on a trello card.
+      # You can see examples of how to use `include` and `match` below.
       def skeleton_filter_method
         attachment_request_body
-          .find_all { |i| i[] } # MODIFY
+          .find_all { |i| i[] } # MODIFY inside the brackets
           .map { |i| i[] }
       end
 
@@ -54,13 +51,14 @@ module Revere
           .map { |i| i["url"] }
       end
 
-### pull out
       def school_id_urls
         attachment_request_body
-        .find_all { |i| i["url"].include?("our_url.com") }
+        .find_all { |i| i["url"].include?("our_school_url.com") }
         .map { |i| i["url"] }
       end
 
+      # MODIFY
+      # You'll probably want to rename this method. Connects on line 87 of revere.rb #TODO
       def create_school_attachment(url, name)
         Trello.request(:post, "cards/#{id}/attachments", url: url, name: name)
       end
@@ -125,23 +123,26 @@ module Revere
       Card.new(card_id)
     end
 
-    # triggers the webhook
+    # Creates the webhook
     def self.create_webhook(callback_url, board_name)
       board_id = boards.fetch(board_name)
       response = request(:post, "webhooks", callbackURL: callback_url, idModel: board_id)
       response.to_s
     end
 
+    # Finds all the cards on each board
     def self.find_all_cards
       boards.each_value.map { |board_id| request(:get, "boards/#{board_id}/cards/open") }
     end
 
+    # Maps card IDs to an array
     def self.get_card_ids
       find_all_cards.flatten.compact.map do |card|
         card.fetch("id")
       end
     end
 
+    # Finds the names of each list on all boards
     def self.get_all_lists
       boards.each_value.map { |board_id| request(:get, "boards/#{board_id}/lists?fields=name") }
         .flatten
@@ -151,7 +152,7 @@ module Revere
       get_all_lists.map { |hash| hash.fetch("name")}
     end
 
-    # template for trello requests
+    # This is the template for Trello requests. You can always make more requests of your own using this method.
     def self.request(verb, path, options={})
       uri = Addressable::URI.parse(File.join(BASE_URI, path))
       uri.query_values = { key: API_KEY, token: TOKEN }.merge(options)
