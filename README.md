@@ -45,7 +45,7 @@ Revere has two parts - first, it updates the Zendesk ticket with information fro
 
 ### Zendesk
 
-- Revere adds both the Trello list name and board name (in separate fields) to a ticket. Both of these are dropdown menus so that the Customer Care team can create custom views in Zendesk with each field. The list of list names is updated automatically, but if you want to add an additional Trello board, that will have to be done manually.
+- Revere adds both the Trello list name and board name (in separate fields) to a ticket. Both of these are dropdown menus so that the Customer Care team can create custom views in Zendesk with each field. The list of list names is updated automatically (`Zendesk.update_ticket_fields`), but if you want to add an additional Trello board, that will have to be done manually.
 - Revere adds any associated Github links (PRs, issues) to a field in a ticket. This way the CC team can keep track of what the engineering team is up to and make sure bugs and issues are being managed properly.
 
 ### Trello

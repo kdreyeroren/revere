@@ -8,7 +8,7 @@ RSpec.describe Revere do
 
   TRELLO_BASE_URI  = Revere::Trello::BASE_URI
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
-  BOARD_ID_DEV_Q   = Revere::Trello::BOARD_ID_DEV_Q
+  BOARD_ID         = Revere::Trello::BOARD_ID
   BOARD_ID_SPRINT  = Revere::Trello::BOARD_ID_SPRINT
   GITHUB_BASE_URI  = Revere::Github::BASE_URI
   GITHUB_REPO      = Revere::Github::GITHUB_REPO
@@ -60,8 +60,8 @@ RSpec.describe Revere do
     stub_request(:put, %r"#{TRELLO_BASE_URI}cards/#{card_id}/idList").to_return(status: 200, body: "{}")
   end
 
-  def stub_trello_board_dev_q(card_id, body)
-    stub_request(:get, %r"#{TRELLO_BASE_URI}boards/#{BOARD_ID_DEV_Q}/cards").to_return(status: 200, body: body.to_json)
+  def stub_trello_board(card_id, body)
+    stub_request(:get, %r"#{TRELLO_BASE_URI}boards/#{BOARD_ID}/cards").to_return(status: 200, body: body.to_json)
   end
 
   def stub_trello_board_sprint(card_id, body)
@@ -113,21 +113,21 @@ RSpec.describe Revere do
   end
 
 
-  it "creates a trello webhook for dev questions board" do
-    allow(Revere::Trello).to receive(:create_webhook_dev_q).and_return("hello")
+  it "creates a trello webhook for trello board" do
+    allow(Revere::Trello).to receive(:create_webhook_trello_board).and_return("hello")
 
-    post "/create_trello_webhook_dev_q"
+    post "/create_trello_webhook_trello_board"
 
     expect(last_response.status).to eq 200
     expect(last_response.body).to include "hello"
-    expect(Revere::Trello).to have_received(:create_webhook_dev_q).with("http://example.org/trello")
+    expect(Revere::Trello).to have_received(:create_webhook_trello_board).with("http://example.org/trello")
   end
 
-  it "creates a trello webhook for dev q with a stub" do
+  it "creates a trello webhook for trello board with a stub" do
     stub_request(:post, %r{#{TRELLO_BASE_URI}webhooks\?callbackURL=http://example.org/trello})
       .to_return(status: 200, body: "{}", headers: {})
 
-    post "/create_trello_webhook_dev_q"
+    post "/create_trello_webhook_trello_board"
 
     expect(last_response.status).to eq 200
   end
@@ -226,7 +226,7 @@ RSpec.describe Revere do
     list_name = "list name"
     board_name = "board_name"
     # stub_trello_board_with_card_id(card_id, [{id: board_id}])
-    stub_trello_board_dev_q(card_id, [{id: card_id}])
+    stub_trello_board(card_id, [{id: card_id}])
     stub_trello_board_sprint(card_id, [])
     # stub_trello_attachment(board_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
     stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])

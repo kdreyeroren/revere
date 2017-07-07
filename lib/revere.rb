@@ -11,7 +11,7 @@ require "revere/zendesk"
 
 module Revere
 
-  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_URL")
+  TARGET_BASE_URL = ENV.fetch("TARGET_URL")
 
   def self.configure
     Raven.configure do |config|
@@ -82,7 +82,7 @@ module Revere
   def self.update_trello_card(card, school_id)
     ### pull out
     return if school_id.to_s !~ /\A\d+\z/
-    url = "#{STAFF_BASE_URL}#{school_id}"
+    url = "#{TARGET_BASE_URL}#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
       card.create_school_attachment(url, "School ID: #{school_id}") #TODO
     end

@@ -7,7 +7,7 @@ RSpec.describe Revere do
   end
 
   ZENDESK_BASE_URI = Revere::Zendesk::BASE_URI
-  STAFF_BASE_URL = ENV.fetch("TEACHABLE_STAFF_URL")
+  TARGET_BASE_URL = ENV.fetch("TARGET_URL")
 
   def stub_trello(verb, path, body = {}, status = 200)
     stub_request(verb, %r"#{Revere::Trello::BASE_URI}#{path}")
@@ -36,11 +36,11 @@ RSpec.describe Revere do
     stub_request(:get, %r"#{Revere::Github::BASE_URI}repos/#{Revere::Github::REPO}/pulls/#{number}")
   end
 
-  it "creates a trello webhook for dev q with a stub" do
-    stub_request(:post, %r{#{Revere::Trello::BASE_URI}webhooks\?callbackURL=http://example.org/trello&idModel=#{Revere::Trello::BOARDS["dev_q"]}})
+  it "creates a trello webhook for the trello board with a stub" do
+    stub_request(:post, %r{#{Revere::Trello::BASE_URI}webhooks\?callbackURL=http://example.org/trello&idModel=#{Revere::Trello::BOARDS["board"]}})
       .to_return(status: 200, body: "{}", headers: {})
 
-    post "/create_trello_webhook/dev_q"
+    post "/create_trello_webhook/board"
 
     expect(last_response.status).to eq 200
   end
@@ -55,7 +55,7 @@ RSpec.describe Revere do
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 
-    expect(a_request(:post, %r"#{Revere::Trello::BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, name: "School ID: #{school_id}", token: Revere::Trello::TOKEN, url: "#{STAFF_BASE_URL}12345"})).to have_been_made
+    expect(a_request(:post, %r"#{Revere::Trello::BASE_URI}cards/trello_card_id/attachments").with(query: {key: Revere::Trello::API_KEY, name: "School ID: #{school_id}", token: Revere::Trello::TOKEN, url: "#{TARGET_BASE_URL}12345"})).to have_been_made
   end
 
   it "doesn't put the school id in the card if it's already there" do
@@ -63,7 +63,9 @@ RSpec.describe Revere do
     ticket_id = "zendesk_ticket_id"
     school_id = "45678"
 
-    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "#{STAFF_BASE_URL}#{school_id}"}])
+    stub_trello_posted_attachments(card_id)
+
+    stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}, {url: "#{TARGET_BASE_URL}#{school_id}"}])
 
     Revere.update_trello_card(Revere::Trello::Card.new(card_id), school_id)
 

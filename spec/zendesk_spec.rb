@@ -153,11 +153,7 @@ RSpec.describe Revere do
     ticket_id = "1337"
     list_name = "list name"
     board_name = "board_name"
-    stub_trello_cards_on_board(:dev_q, card_id, [{id: card_id}])
-    stub_trello_cards_on_board(:sprint, card_id, [])
-    stub_trello_cards_on_board(:icebox, card_id, [])
-    stub_trello_cards_on_board(:ios_app, card_id, [])
-    stub_trello_cards_on_board(:customer_care, card_id, [])
+    stub_trello_cards_on_board(:board, card_id, [{id: card_id}])
     stub_trello_attachment(card_id, [{url: "zendesk.com/ticket/#{ticket_id}"}])
     stub_trello_list(card_id, {name: list_name})
     stub_trello_board_with_card_id(card_id, {name: board_name})
@@ -182,16 +178,15 @@ RSpec.describe Revere do
   end
 
   it "updates the trello list names in zendesk" do
-    #card_id = "trello_card_id"
     list_name1 = "list name 1"
     list_name2 = "list name 2"
     value1 = "list_name_1"
     value2 = "list_name_2"
 
-    allow(Revere::Trello).to receive(:boards).and_return({"dev_q" => "12345", "sprint" => "67890"})
+    allow(Revere::Trello).to receive(:boards).and_return({"board1" => "12345", "board2" => "67890"})
 
-    stub_trello_list_by_board_with_name_field(:dev_q, [{name: list_name1}])
-    stub_trello_list_by_board_with_name_field(:sprint, [{name: list_name2}])
+    stub_trello_list_by_board_with_name_field(:board1, [{name: list_name1}])
+    stub_trello_list_by_board_with_name_field(:board2, [{name: list_name2}])
     stub_trello_list_in_zendesk([{name: list_name1, value: value1},{name: list_name2, value: value2}])
 
     Revere.update_trello_list_names_in_zendesk

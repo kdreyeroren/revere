@@ -7,7 +7,8 @@ module Revere
     BASE_URI        = ENV.fetch("TRELLO_BASE_URI")
 
     # MODIFY
-    # Add any board you're using to the env file, as well as the env.test file, then link them up here
+    # Add any board you're using to the env file, as well as the env.test file, then link them up here.
+    # You can have as many boards as you want.
     BOARDS = {
       "board" => ENV.fetch("TRELLO_BOARD_ID")
     }

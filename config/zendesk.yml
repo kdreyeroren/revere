@@ -1,3 +1,6 @@
+# MODIFY
+# Update this using your own real credentials in the "live" section and test credentials in the "test" section.
+
 live: &live
   custom_fields:
     ticket:
