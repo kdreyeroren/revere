@@ -58,8 +58,6 @@ module Revere
         .map { |i| i["url"] }
       end
 
-      # MODIFY
-      # You'll probably want to rename this method. Connects on line 87 of revere.rb #TODO
       def create_school_attachment(url, name)
         Trello.request(:post, "cards/#{id}/attachments", url: url, name: name)
       end

@@ -50,8 +50,6 @@ module Revere
     end
   end
 
-
-  # TODO
   def self.lock(lock_id, tries, &block)
     lock = Redis::Lock.new(lock_id)
     lock.synchronize do
@@ -80,11 +78,10 @@ module Revere
   end
 
   def self.update_trello_card(card, school_id)
-    ### pull out
     return if school_id.to_s !~ /\A\d+\z/
     url = "#{TARGET_BASE_URL}#{school_id}"
     if card.school_id_urls.none? { |i| i == url }
-      card.create_school_attachment(url, "School ID: #{school_id}") #TODO
+      card.create_school_attachment(url, "School ID: #{school_id}")
     end
   end
 
