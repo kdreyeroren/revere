@@ -87,30 +87,31 @@ Spec currently works as-is. You'll probably want to update it as you build out y
 
 Below is a sample `.env.test` file. Again, everything here works with the current spec, but you'll want to modify all of these test env vars to suit your system. Some of them do not have to fit the particular system's conventions; others do. Items to modify are below.
 
-`# Trello
+### Trello
 
-# For test purposes, the only Trello details that have to be accurate are list IDs and user ID. I created a test account separate even from my bot account, and I recommend you do the same, and use all associated IDs.
+For test purposes, the only Trello details that have to be accurate are list IDs and user ID. I created a test account separate even from my bot account, and I recommend you do the same, and use all associated IDs.
 
-TRELLO_API_KEY="TRELLO_API_KEY"
+`TRELLO_API_KEY="TRELLO_API_KEY"
 TRELLO_TOKEN="TRELLO_TOKEN"
 TRELLO_BOARD_ID="TRELLO_BOARD_ID"
 TRELLO_BASE_URI="http://trello-base-uri/"
-TRELLO_USER_ID="your_real_test_user_ID"
+TRELLO_USER_ID="your_real_test_user_ID"`
 
-# Zendesk
-ZENDESK_USER="ZENDESK_USER"
+### Zendesk
+
+`ZENDESK_USER="ZENDESK_USER"
 ZENDESK_TOKEN="ZENDESK_TOKEN"
-ZENDESK_BASE_URI="http://zendesk-base-uri/"
+ZENDESK_BASE_URI="http://zendesk-base-uri/"`
 
-# Github
+### Github
 
-# You'll have to use your real Github repo below
+You'll have to use your real Github repo below
 
-GITHUB_BASE_URI="https://api.github.com/"
-GITHUB_REPO="github_username/repo_name"
+`GITHUB_BASE_URI="https://api.github.com/"
+GITHUB_REPO="github_username/repo_name"`
 
-# Internal Variables
+### Internal Variables
 
-# You'll want to use real internal URLs here.
+You'll want to use real internal URLs here.
 
-TARGET_URL="https://our_school_url.com/"``
+`TARGET_URL="https://our_school_url.com/"```
